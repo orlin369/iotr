@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="style.min.css" rel="stylesheet" type="text/css">
+        <title>Robot Monitor - SETTINGS</title>
+    </head>
+    <body class="with-fixed-menu">
+        <input type="checkbox" class="hidden" id="nav-toggle" autocomplete="off">
+        <div class="nav fixed grid-container">
+            <div class="col xs-no md-1"></div>
+            <div class="col xs-12 sm-7 md-6">
+                <span class="logo">Robot Monitor v1.0&nbsp;|</span>
+                <ul>
+                    <li><a href="/dashboard" class="link">Dashboard</a></li>
+                    <li><a href="/settings" class="link">Settings</a></li>
+                    <li><a href="/network" class="link">Network</a></li>
+                    <li class="active"><a href="/mqtt" class="link">MQTT</a></li>
+                    <li><a href="#" class="link">Help</a></li>
+                    <li><a href="/logout" class="link">Logout</a></li>
+                </ul>
+            </div>
+            <div class="col xs-12 sm-3 md-4 text-right">
+                <div class="head-right">
+                    <span id="clock">00.00.0000/00:00:00</span>
+                    <span>|</span>
+                    <span>127.0.0.1</span>
+                </div>
+            </div>
+            <div class="col xs-no md-1">
+            </div>
+        </div>
+        <label for="nav-toggle"></label>
+        <div class="grid-container">
+            <div class="row">
+                <div class="col xs-no md-3"></div>
+                <div class="col xs-12 md-6">
+                    <form action="" method="post" class="section">
+                        <fieldset>
+                            <legend>MQTT</legend>
+                            <div class="grid-container">
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <span class="form-label">Domain/IP:</span>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="domain" name="domain" value="" class="form-control" placeholder="Domain"  required="required"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <span class="form-label">Port:</span>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="port" name="port" value="" class="form-control" placeholder="Port" required="required"/>
+                                    </div>
+                                </div>
+                                <!--user-->
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="user" class="form-label">User:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="user" name="user" value="" class="form-control" placeholder="user" required="required"/>
+                                    </div>
+                                </div>
+                                <!--PASS-->
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="password" class="form-label">Password:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="password" id="password" name="password" value="" class="form-control" placeholder="Password" />
+                                    </div>
+                                </div>
+                                <!--Authentication-->
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="auth" class="form-label">Authentication:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="checkbox" id="auth" name="auth" class="form-control" placeholder="15" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <input type="submit" class="form-control" value="Save">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="row footer">
+                    <div class="col xs-12 md-10 footer text-center-xs">
+                        <p style="padding-top: 10px;"><strong>Robot Monitor Dashboard</strong> was designed and built by Orlin Dimitrov.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script language="javascript" type="text/javascript" src="/microajax.js"></script>
+        <!-- Javascript test -->
+        <script language='javascript' type='text/javascript'>
+
+function formatTwoDigits(i) {
+    if (i < 10) {i = '0' + i};// add zero in front of numbers < 10
+    return i;
+}
+
+function startTime() {
+    var today = new Date();
+    var years = today.getFullYear();
+    var month = today.getMonth();
+    var date = today.getDate();
+    var hours = today.getHours();
+    var minutes = today.getMinutes();
+    var seconds = today.getSeconds();
+
+    date = formatTwoDigits(date);
+    month = formatTwoDigits(month);
+    hours = formatTwoDigits(hours);
+    minutes = formatTwoDigits(minutes);
+    seconds = formatTwoDigits(seconds);
+
+    var clockText = date + '.' + month + '.' + years + '/' + hours + ':' + minutes + ':' + seconds;
+    document.getElementById('clock').innerHTML = clockText;
+
+    var t = setTimeout(startTime, 500);
+}
+
+function getMqttValues() {
+    // Device name and version.
+    setValues('/api/v1/mqtt');
+}
+
+window.onload = function () {
+    startTime();
+    setTimeout(getMqttValues, 500);
+}
+        </script>
+    </body>
+</html>

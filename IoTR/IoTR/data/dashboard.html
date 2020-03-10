@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Robot Monitor - SETTINGS</title>
+        <link href="style.min.css" rel="stylesheet" type="text/css">
+        <style>
+            /* CSS RESET */
+            
+            html,
+            body,
+            div,
+            span,
+            applet,
+            object,
+            iframe,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            blockquote,
+            pre,
+            a,
+            abbr,
+            acronym,
+            address,
+            big,
+            cite,
+            code,
+            del,
+            dfn,
+            em,
+            img,
+            ins,
+            kbd,
+            q,
+            s,
+            samp,
+            small,
+            strike,
+            strong,
+            sub,
+            sup,
+            tt,
+            var,
+            b,
+            u,
+            i,
+            center,
+            dl,
+            dt,
+            dd,
+            ol,
+            ul,
+            li,
+            fieldset,
+            form,
+            label,
+            legend,
+            table,
+            caption,
+            tbody,
+            tfoot,
+            thead,
+            tr,
+            th,
+            td,
+            article,
+            aside,
+            canvas,
+            details,
+            embed,
+            figure,
+            figcaption,
+            footer,
+            header,
+            hgroup,
+            menu,
+            nav,
+            output,
+            ruby,
+            section,
+            summary,
+            time,
+            mark,
+            audio,
+            video {
+                margin: 0;
+                padding: 0;
+                border: 0;
+                font-size: 100%;
+                font: inherit;
+                vertical-align: baseline;
+            }
+            
+            article,
+            aside,
+            details,
+            figcaption,
+            figure,
+            footer,
+            header,
+            hgroup,
+            menu,
+            nav,
+            section {
+                display: block;
+            }
+            
+            body {
+                line-height: 1;
+            }
+            
+            ol,
+            ul {
+                list-style: none;
+            }
+            
+            blockquote,
+            q {
+                quotes: none;
+            }
+            
+            blockquote:before,
+            blockquote:after,
+            q:before,
+            q:after {
+                content: '';
+                content: none;
+            }
+            
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+            }
+            /* CONTAINERS */
+            
+            .container {
+                max-width: 430px;
+                margin: 50px auto 0 auto;
+            }
+            
+            .f-container {
+                margin: 0 15px;
+            }
+            /* FORM DEMO */
+            
+            .f-wall {
+                width: 100%;
+                height: 12px;
+                position: relative;
+                border: 4px dashed #ff0000;
+                border-left: none;
+                border-right: none;
+            }
+            
+            .f-wall:before {
+                top: 4px;
+                left: 0;
+                right: 0;
+                content: '';
+                display: block;
+                position: absolute;
+                border-bottom: 4px dashed #ff0000;
+            }
+            
+            .f-wall.f-active,
+            .f-wall.f-active:before,
+            .f-wall.f-active:after {
+                border-color: #32cd32;
+            }
+            
+            .f-circle {
+                width: 75%;
+                padding-bottom: 75%;
+                background-color: #000;
+                position: relative;
+                margin: 15px auto;
+                border-radius: 50%;
+            }
+            
+            .f-left-bumper,
+            .f-right-bumper {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                border-radius: 50%;
+                position: absolute;
+                transform: rotate(45deg);
+                border: 5px solid transparent;
+            }
+            
+            .f-left-bumper {
+                border-left-color: #ff0000;
+            }
+            
+            .f-left-bumper.f-active {
+                border-left-color: #32cd32;
+            }
+            
+            .f-right-bumper {
+                border-top-color: #ff0000;
+            }
+            
+            .f-right-bumper.f-active {
+                border-top-color: #32cd32;
+            }
+            
+            .f-cliff-front-left {
+                top: 10%;
+                left: 30%;
+                right: 63%;
+                bottom: 87%;
+                position: absolute;
+                background-color: #ff0000;
+            }
+            
+            .f-cliff-front-left.f-active {
+                background-color: #32cd32;
+            }
+            
+            .f-cliff-front-right {
+                top: 10%;
+                left: 63%;
+                right: 30%;
+                bottom: 87%;
+                position: absolute;
+                background-color: #ff0000;
+            }
+            
+            .f-cliff-front-right.f-active {
+                background-color: #32cd32;
+            }
+            
+            .f-cliff-left {
+                top: 25%;
+                left: 14%;
+                right: 79%;
+                bottom: 72%;
+                position: absolute;
+                background-color: #ff0000;
+            }
+            
+            .f-cliff-left.f-active {
+                background-color: #32cd32;
+            }
+            
+            .f-cliff-right {
+                top: 25%;
+                left: 79%;
+                right: 14%;
+                bottom: 72%;
+                position: absolute;
+                background-color: #ff0000;
+            }
+            
+            .f-cliff-right.f-active {
+                background-color: #32cd32;
+            }
+            
+            .f-left-wheel {
+                top: 37%;
+                left: 11%;
+                right: 77%;
+                bottom: 38%;
+                position: absolute;
+                background-color: #808080;
+                border: 5px solid #ff0000;
+            }
+            
+            .f-left-wheel.f-active {
+                border-color: #32cd32;
+            }
+            
+            .f-right-wheel {
+                top: 37%;
+                left: 77%;
+                right: 11%;
+                bottom: 38%;
+                position: absolute;
+                background-color: #808080;
+                border: 5px solid #ff0000;
+            }
+            
+            .f-right-wheel.f-active {
+                border-color: #32cd32;
+            }
+        </style>
+    </head>
+    <body class="with-fixed-menu">
+        <input type="checkbox" class="hidden" id="nav-toggle" autocomplete="off">
+        <div class="nav fixed grid-container">
+            <div class="col xs-no md-1"></div>
+            <div class="col xs-12 sm-7 md-6">
+                <span class="logo">Robot Monitor v1.0&nbsp;|</span>
+                <ul>
+                    <li class="active"><a href="/dashboard" class="link">Dashboard</a></li>
+                    <li><a href="/settings" class="link">Settings</a></li>
+                    <li><a href="/network" class="link">Network</a></li>
+                    <li><a href="/mqtt" class="link">MQTT</a></li>
+                    <li><a href="#" class="link">Help</a></li>
+                    <li><a href="/logout" class="link">Logout</a></li>
+                </ul>
+            </div>
+            <div class="col xs-12 sm-3 md-4 text-right">
+                <div class="head-right">
+                    <span id="clock">00.00.0000/00:00:00</span>
+                    <span>|</span>
+                    <span>127.0.0.1</span>
+                </div>
+            </div>
+            <div class="col xs-no md-1">
+            </div>
+        </div>
+        <label for="nav-toggle"></label>
+        <div class="grid-container">
+            <div class="row">
+                <div class="col xs-12 md-8">
+                    <div class="f-container">
+                        <div id="f-wall" class="f-wall"></div>
+                        <div class="f-circle">
+                            <div id="f-left-bumper" class="f-left-bumper"></div>
+                            <div id="f-right-bumper" class="f-right-bumper"></div>
+                            <div id="f-cliff-front-left"  class="f-cliff-front-left"></div>
+                            <div id="f-cliff-front-right" class="f-cliff-front-right"></div>
+                            <div id="f-cliff-left" class="f-cliff-left"></div>
+                            <div id="f-cliff-right" class="f-cliff-right"></div>
+                            <div id="f-left-wheel" class="f-left-wheel"></div>
+                            <div id="f-right-wheel" class="f-right-wheel"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col xs-12 md-4">
+                    <text id="dbg" class="form-control"></text>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col xs-12 md-3">
+                    <a href="javascript:startDevice();" class="btn btn--m btn--blue">Start</a>
+                </div>
+                <div class="col xs-12 md-3">
+                    <a href="javascript:stopDevice();" class="btn btn--m btn--blue">Stop</a>
+                </div>
+            </div>
+        </div>
+        <div class="grid-container">
+            <div class="row footer">
+                <div class="col xs-12 md-10 footer text-center-xs">
+                    <p style="padding-top: 10px;"><strong>Robot Monitor Dashboard</strong> was designed and built by Orlin Dimitrov.</p>
+                </div>
+            </div>
+        </div>
+        <script language="javascript" type="text/javascript" src="/microajax.js"></script>
+        <script language='javascript' type='text/javascript'>
+
+            function formatTwoDigits(i) {
+                if (i < 10) {i = '0' + i};// add zero in front of numbers < 10
+                return i;
+            }
+
+            function startTime() {
+                var today = new Date();
+                var years = today.getFullYear();
+                var month = today.getMonth();
+                var date = today.getDate();
+                var hours = today.getHours();
+                var minutes = today.getMinutes();
+                var seconds = today.getSeconds();
+
+                date = formatTwoDigits(date);
+                month = formatTwoDigits(month);
+                hours = formatTwoDigits(hours);
+                minutes = formatTwoDigits(minutes);
+                seconds = formatTwoDigits(seconds);
+
+                var clockText = date + '.' + month + '.' + years + '/' + hours + ':' + minutes + ':' + seconds;
+                document.getElementById('clock').innerHTML = clockText;
+
+                var t = setTimeout(startTime, 500);
+            }
+
+            function startDevice() {
+                // Device name and version.
+                setValues('/api/v1/device/start');
+            }
+
+            function stopDevice() {
+                // Device name and version.
+                setValues('/api/v1/device/stop');
+            }
+
+            function iRobot(url) {
+
+                var url = url;
+                var eventSource = new EventSource(url);
+
+                function removeClass(id, styleClass)
+                {
+                    var element = document.getElementById(id);
+                    element.classList.remove(styleClass);
+                }
+
+                function addClass(id, styleClass)
+                {
+                    var element = document.getElementById(id);
+                    element.classList.add(styleClass);
+                }
+
+                function bit_check(num, bit) {
+                    return ((num >> bit) % 2 != 0);
+                }
+
+                function bit_set(num, bit) {
+                    return num | 1 << bit;
+                }
+
+                function bit_clear(num, bit) {
+                    return num & ~(1 << bit);
+                }
+
+                function bit_toggle(num, bit) {
+                    return bit_check(num, bit) ? bit_clear(num, bit) : bit_set(num, bit);
+                }
+
+                function addMessage(m){
+                    var msg = document.createElement("div");
+                    msg.innerText = m;
+                    document.getElementById("dbg").appendChild(msg);
+                    // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                }
+
+                function updateAnimation(deviceState)
+                {
+                    // Wall sensor
+                    if(deviceState.Wall == 1) {
+                        //simple deactivation
+                        removeClass('f-wall', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-wall', 'f-active');
+                    }
+
+                    // Cliff left
+                    if(deviceState.CliffLeft == 1) {
+                        //simple deactivation
+                        removeClass('f-cliff-left', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-cliff-left', 'f-active');
+                    }
+
+                    // Cliff Front Left
+                    if(deviceState.CliffFrontLeft == 1) {
+                        //simple deactivation
+
+                        removeClass('f-cliff-front-left', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-cliff-front-left', 'f-active');
+                    }
+
+                    // Cliff Front Right
+                    if(deviceState.CliffFrontRight == 1) {
+                        //simple deactivation
+                        removeClass('f-cliff-front-right', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-cliff-front-right', 'f-active');
+                    }
+
+                    // Cliff Right
+                    if(deviceState.CliffRight == 1) {
+                        //simple deactivation
+
+                        removeClass('f-cliff-right', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-cliff-right', 'f-active');
+                    }
+
+                    // Right bumper
+                    if(bit_check(deviceState.BumpersAndWheelDrops, 0)) {
+                        //simple deactivation
+
+                        removeClass('f-right-bumper', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-right-bumper', 'f-active');
+                    }
+
+                    // Left bumper
+                    if(bit_check(deviceState.BumpersAndWheelDrops, 1)) {
+                        //simple deactivation
+
+                        removeClass('f-left-bumper', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-left-bumper', 'f-active');
+                    }
+
+                    //
+                    if(bit_check(deviceState.BumpersAndWheelDrops, 2)) {
+                        //simple deactivation
+
+                        removeClass('f-right-wheel', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-right-wheel', 'f-active');
+                    }
+
+                    //
+                    if(bit_check(deviceState.BumpersAndWheelDrops, 3)) {
+                        //simple deactivation
+
+                        removeClass('f-left-wheel', 'f-active');
+                    } else {
+                        //simple activation
+                        addClass('f-left-wheel', 'f-active');
+                    }
+                }
+
+                this.init = function()
+                {
+                    eventSource.onopen = function(e) {
+                        addMessage("Events Opened");
+                    };
+                    eventSource.onerror = function(e) {
+                        if (e.target.readyState != EventSource.OPEN) {
+                            addMessage("Events Closed");
+                        }
+                    };
+                    eventSource.onmessage = function(e) {
+                        addMessage("Event: " + e.data);
+                    };
+                    eventSource.addEventListener('deviceState', function(e) {
+                        if (!e.data)
+                        {
+                            return;
+                        }
+                        var deviceState = JSON.parse(e.data);
+                        // console.log(deviceState);
+                        updateAnimation(deviceState);
+                        // addMessage("Event[deviceState]: " + e.data);
+                    }, false);
+                }
+            }
+            
+            function IRCommands(url, topic, viewElement) {
+
+                var viewElement = viewElement;
+                var topic = topic;
+                var eventSource = new EventSource(url);
+
+                function addMessage(m){
+                    var msg = document.createElement("div");
+                    msg.innerText = m;
+                    document.getElementById(viewElement).appendChild(msg);
+                    // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                }
+
+                this.init = function()
+                {
+                    eventSource.onopen = function(e) {
+                        addMessage("IR Opened");
+                        
+                    };
+                    eventSource.onerror = function(e) {
+                        if (e.target.readyState != EventSource.OPEN) {
+                        addMessage("IR Closed");
+                        }
+                    };
+                    eventSource.onmessage = function(e) {
+                        addMessage("Event: " + e.data);
+                    };
+                    eventSource.addEventListener(topic, function(e) {
+                        if (!e.data)
+                        {
+                            return;
+                        }
+                        
+                        // console.log(e.data);
+
+                        addMessage("Event[irCommand]: " + e.data);
+                    }, false);
+                }
+            }
+
+            function Logger(url, topic, viewElement) {
+
+                var viewElement = viewElement;
+                var topic = topic;
+                var eventSource = new EventSource(url);
+
+                var addMessage = function (m) {
+                    var msg = document.createElement("div");
+                    msg.innerText = m;
+                    document.getElementById(viewElement).appendChild(msg);
+                    // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                }
+
+                this.init = function() {
+                    eventSource.onopen = function(e) {
+                        addMessage("Logger Opened");
+                    };
+                    eventSource.onerror = function(e) {
+                        if (e.target.readyState != EventSource.OPEN) {
+                        addMessage("Logger Closed");
+                        }
+                    };
+                    eventSource.onmessage = function(e) {
+                        addMessage("Event: " + e.data);
+                    };
+                    eventSource.addEventListener(topic, function(e) {
+                        if (!e.data)
+                        {
+                            return;
+                        }
+                        addMessage("Event[log]: " + e.data);
+                    }, false);
+                };
+            }
+
+            window.onload = function () {
+                var url = "/api/v1/events";
+
+                var logger = new Logger(url, "log", "dbg");
+                logger.init();
+
+                var irCommands = new IRCommands(url, "irCommand", "dbg");
+                irCommands.init();
+
+                var robot = new iRobot(url);
+                robot.init();
+
+                startTime();
+            }
+        </script>
+    </body>
+</html>
