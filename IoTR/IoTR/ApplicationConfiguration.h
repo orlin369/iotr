@@ -31,15 +31,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // TODO: NTP
-#define PIN_LED1 D3
-#define PIN_LED2 D2
-#define PIN_LED3 D1
-#define PIN_LED4 D0
+#define PIN_LED1 5  // D3 - NodeMCU
+#define PIN_LED2 16 // D2 - NodeMCU
+#define PIN_LED3 1  // D1 - NodeMCU
+#define PIN_LED4 3  // D0 - NodeMCU
 
-#define PIN_BTN1 D5
-#define PIN_BTN2 D6
-#define PIN_BTN3 D7
-#define PIN_BTN4 D4
+#define PIN_BTN1 14 // D5 - NodeMCU
+#define PIN_BTN2 12 // D6 - NodeMCU
+#define PIN_BTN3 13 // D7 - NodeMCU
+#define PIN_BTN4 4  // D4 - NodeMCU
 
 #pragma region General Configuration
 
@@ -55,31 +55,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ESP_FW_VERSION 1
 
 /** @brief Switch the logging terminal. */
-//#define DEBUGLOG SERIALLOG
+#define DEBUGLOG SERIALLOG
 
 /** @brief Show functions names. */
-//#define SHOW_FUNC_NAMES
+#define SHOW_FUNC_NAMES
 
 /** @brief Show configuration file. */
-//#define SHOW_CONFIG
+#define SHOW_CONFIG
 
 /** @brief Enable Arduino updates. */
-//#define ENABLE_ARDUINO_OTA
+#define ENABLE_ARDUINO_OTA
 
 /** @brief Enable HTTP updates. */
-//#define ENABLE_HTTP_OTA
+#define ENABLE_HTTP_OTA
 
 /** @brief Enable IR controll interface. */
-//#define ENABLE_IR_INTERFACE
+#define ENABLE_IR_INTERFACE
 
 /** @brief Enable Status LED. */
-//#define ENABLE_STATUS_LED
+#define ENABLE_STATUS_LED
 
 /** @brief Enable device control. */
-//#define ENABLE_DEVICE_CONTROL
+#define ENABLE_DEVICE_CONTROL
 
 /** @brief Enable software ON and OFF. */
-//#define EANBLE_SOFTWARE_ONOFF
+#define EANBLE_SOFTWARE_ONOFF
 
 #pragma endregion
 
@@ -125,15 +125,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region STA Configuration
 
+/** @brief Maximum time to connect to local AP. */
 #define TIMEOUT_TO_CONNECT 30
 
 /** @brief Default STA SSID. */
-#define DEFAULT_STA_SSID "IOsoft@home"
-//#define DEFAULT_STA_SSID "YOUR_DEFAULT_WIFI_PASSWD"
+#define DEFAULT_STA_SSID "YOUR_DEFAULT_WIFI_PASSWD"
 
 /** @brief Default STA password. */
-#define DEFAULT_STA_PASSWORD "pic18f4620"
-//#define DEFAULT_STA_PASSWORD "YOUR_DEFAULT_WIFI_SSID"
+#define DEFAULT_STA_PASSWORD "YOUR_DEFAULT_WIFI_SSID"
 
 /** @brief Default enabled DHCP client. */
 #define DEFAULT_ENABLED_DHCP 1
@@ -179,18 +178,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region HTTP Update Configuration
 
-#ifdef ENABLE_HTTP_OTA
-#define UPDATE_SERVER_PORT 80
-
 /** @brief Main domain of the IoTR servers. */
-#define UPDATE_SERVER_DOMAIN "http://robko01.free.bg/"
+//#define UPDATE_SERVER_DOMAIN "http://your.domain/"
 
 /** @brief ESP updatest root endpoint. */
-#define UPDATE_SERVER_PATH_ESP "api/v1/device/fota/esp/update" // "updater/esp/index.php"
+//#define UPDATE_SERVER_PATH_ESP "updater/esp/index.php"
 
 /** @brief ESP version root endpoint. */
-#define VERSION_SERVER_PATH_ESP "api/v1/device/fota/esp/version" // "updater/esp/version/index.php"
-#endif // !ENABLE_HTTP_OTA
+//#define VERSION_SERVER_PATH_ESP "updater/esp/version/index.php"
 
 #pragma endregion
 
@@ -208,7 +203,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1
-#define PIN_RGB_LED D8
+#define PIN_RGB_LED 0 // D8 - NodeMCU
 
 #endif // ENABLE_STATUS_LED
 
@@ -227,5 +222,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif // !DEBUGLOG
 
 #endif // _APPLICATIONCONFIGURATION_h
-
-//TODO:vRonoliga prava draiv.

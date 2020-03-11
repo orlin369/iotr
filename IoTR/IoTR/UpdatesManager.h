@@ -47,25 +47,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef UPDATE_SERVER_DOMAIN
 /** @brief Main domain of the IoTR servers. */
-#define UPDATE_SERVER_DOMAIN "http://your.domain/"
+#define UPDATE_SERVER_DOMAIN "http://iotr.tech/"
 #endif // !UPDATE_SERVER_DOMAIN
 
 #ifndef UPDATE_SERVER_PATH_ESP
 /** @brief ESP updatest rout endpoint. */
-#define UPDATE_SERVER_PATH_ESP "updater/esp/index.php"
+#define UPDATE_SERVER_PATH_ESP "api/v1/device/fota/esp/update"
 #endif // !UPDATE_SERVER_PATH_ESP
 
 #ifndef VERSION_SERVER_PATH_ESP
 /** @brief ESP version rout endpoint. */
-#define VERSION_SERVER_PATH_ESP "updater/esp/version/index.php"
+#define VERSION_SERVER_PATH_ESP "api/v1/device/fota/esp/version"
 #endif // !VERSION_SERVER_PATH_ESP
 
-#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
-#endif // ESP8266
 
 #pragma endregion
 
