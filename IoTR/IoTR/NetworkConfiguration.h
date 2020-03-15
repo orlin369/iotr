@@ -69,9 +69,7 @@ typedef struct {
 	IPAddress  Gateway; ///< Local gateway.
 	IPAddress  DNS; ///< Local DNS.
 	bool DHCP; ///< DHCP enable flag.
-	long DTSUpdateInterval; ///< DTS update interval.
-	long DTSTimezone; ///< Timezone of the device.
-	bool DTSDaylight; ///< Daylight flag.
+	String NTPDomain; ///< NTP Server domain.
 } NetworkConfiguration_t;
 
 #pragma endregion

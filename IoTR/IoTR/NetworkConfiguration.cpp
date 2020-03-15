@@ -84,10 +84,6 @@ bool load_network_configuration(FS* fileSystem, const char* path) {
 	NetworkConfiguration.DNS = IPAddress(doc["DNS"][0], doc["DNS"][1], doc["DNS"][2], doc["DNS"][3]);
 
 	NetworkConfiguration.DHCP = doc["DHCP"].as<bool>();
-
-	NetworkConfiguration.DTSUpdateInterval = doc["DTSUpdateInterval"].as<long>();
-	NetworkConfiguration.DTSTimezone = doc["DTSTimezone"].as<long>();
-	NetworkConfiguration.DTSDaylight = doc["DTSDaylight"].as<long>();
 	
 	return true;
 }
@@ -135,14 +131,10 @@ bool save_network_configuration(FS* fileSystem, const char* path) {
 	jsondns.add(NetworkConfiguration.DNS[3]);
 
 	doc["DHCP"] = NetworkConfiguration.DHCP;
-	doc["DTSUpdateInterval"] = NetworkConfiguration.DTSUpdateInterval;
-	doc["DTSTimezone"] = NetworkConfiguration.DTSTimezone;
-	doc["DTSDaylight"] = NetworkConfiguration.DTSDaylight;
-
-	//doc["led"] = config.connectionLed;
 
 	File file = fileSystem->open(path, "w");
-	if (!file) {
+	if (!file)
+	{
 		DEBUGLOG("Failed to open config file for writing\r\n");
 		file.close();
 		return false;
@@ -178,10 +170,4 @@ void set_default_network_configuration() {
 	NetworkConfiguration.NetMask = DEAFULT_NET_MASK;
 	NetworkConfiguration.Gateway = DEAFULT_GW;
 	NetworkConfiguration.DNS = DEAFULT_DNS;
-	//NetworkConfiguration.DTSUpdateInterval = DT_SERVER_UPDATE_SHORT_INTERVAL;
-	//NetworkConfiguration.DTSTimezone = DT_SERVER_TIMEZONE;
-	//NetworkConfiguration.DTSDaylight = DT_SERVER_DAYLIGHT;
-	//NetworkConfiguration.MeasureStartTime = MEASURE_START_TIME;
-	//NetworkConfiguration.MeasureEndTime = MEASURE_END_TIME;
-	//NetworkConfiguration.MeasureTimeInterval = MEASURE_TIME_INTERVAL;
 }
