@@ -62,10 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "GeneralHelper.h"
 
-#include "DeviceState.h"
-
 #pragma endregion
-
 
 class WEBServer : public AsyncWebServer {
 
@@ -94,24 +91,35 @@ public:
 
 	void displayLog(String line);
 
-	/** @brief Set tare process function. Part of the API.
-	 *  @param callback, Start function.
+	/** @brief Send device state.
+	 *  @return Void.
+	 */
+	void sendDeviceState(String device_state);
+
+	/** @brief Set start process function. Part of the API.
+	 *  @param callback, Start functio.
 	 *  @return Void.
 	 */
 	void setCbStartDevice(void(*callback)(void));
 
-	/** @brief Set tare process function. Part of the API.
-	 *  @param callback, Stop functioh.
+	/** @brief Set stop process function. Part of the API.
+	 *  @param callback, Stop functio.
 	 *  @return Void.
 	 */
 	void setCbStopDevice(void(*callback)(void));
+
+	/** @brief Set reboot process function. Part of the API.
+	 *  @param callback, Stop functio.
+	 *  @return Void.
+	 */
+	void setCbReboot(void(*callback)(void));
 
 #pragma endregion
 
 protected:
 
 #pragma region Variables
-	
+
 	/* @brief File system object. */
 	FS* m_fileSystem;
 
@@ -123,11 +131,16 @@ protected:
 	/* @brief Events API handler. */
 	AsyncEventSource m_webSocketEvents = AsyncEventSource("/api/v1/events");
 
+	unsigned int m_keepAliveTime = 0;
+
 	/** @brief Callback function. */
 	void(*callbackStartDevice)(void);
 
 	/** @brief Callback function. */
 	void(*callbackStopDevice)(void);
+
+	/** @brief Callback function. */
+	void(*callbackReboot)(void);
 
 #pragma endregion
 
@@ -239,11 +252,6 @@ protected:
 	 */
 	void apiSendMqttCfg(AsyncWebServerRequest* request);
 
-	/** @brief Execute every one second, if attached event. Part of the API.
-	 *  @return Void.
-	 */
-	void apiSendDeviceState();
-
 	/** @brief Check the authorization status.
 	 *  @param request, AsyncWebServer Request request object.
 	 *  @return boolean, True have to authenticate.
@@ -260,6 +268,11 @@ protected:
 	 *  @return Void.
 	 */
 	void initRouts();
+
+	/** @brief Clear keep alive counter.
+	 *  @return Void.
+	 */
+	void clearAliveTime();
 
 	/** @brief Convert file extension to content type.
 	 *  @param filename, String Name of the file.

@@ -81,6 +81,8 @@ void WEBServer::begin(FS* fs) {
 
 	// Task to run periodic things every second.
 	m_eventUpdater.attach(1.0f, &WEBServer::s_secondTick, static_cast<void*>(this));
+
+	clearAliveTime();
 }
 
 /** @brief Handle OTA process.
@@ -119,6 +121,26 @@ void WEBServer::displayIRCommand(uint32_t command) {
 	}
 }
 
+/** @brief Execute every one second, if attached event. Part of the API.
+ *  @return Void.
+ */
+void WEBServer::sendDeviceState(String device_state) {
+	/*
+	#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+	#endif // SHOW_FUNC_NAMES
+	*/
+
+	// Chack does have someone connected.
+	if (m_webSocketEvents.count() > 0)
+	{
+		m_webSocketEvents.send(device_state.c_str(), "deviceState");
+	}
+}
+
+
 /** @brief Set tare process function. Part of the API.
  *  @param callback, Start function.
  *  @return Void.
@@ -134,7 +156,7 @@ void WEBServer::setCbStartDevice(void(*callback)(void)) {
 }
 
 /** @brief Set tare process function. Part of the API.
- *  @param callback, Stop functioh.
+ *  @param callback, Stop function.
  *  @return Void.
  */
 void WEBServer::setCbStopDevice(void(*callback)(void)) {
@@ -145,6 +167,20 @@ void WEBServer::setCbStopDevice(void(*callback)(void)) {
 #endif // SHOW_FUNC_NAMES
 
 	callbackStopDevice = callback;
+}
+
+/** @brief Set reboot process function. Part of the API.
+ *  @param callback, Stop functio.
+ *  @return Void.
+ */
+void WEBServer::setCbReboot(void(*callback)(void)) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	callbackReboot = callback;
 }
 
 #pragma endregion
@@ -332,6 +368,8 @@ void WEBServer::initRouts() {
 		{
 			request->send(404, "text/plain", "FileNotFound");
 		}
+
+		clearAliveTime();
 	});
 
 	// /dashboard
@@ -341,6 +379,8 @@ void WEBServer::initRouts() {
 			this->goToLogin(request);
 			return;
 		}
+
+		clearAliveTime();
 	});
 
 #pragma endregion
@@ -358,6 +398,8 @@ void WEBServer::initRouts() {
 		{
 			request->send(404, "text/plain", "FileNotFound");
 		}
+
+		clearAliveTime();
 	});
 
 	// /settings
@@ -369,6 +411,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->pageSendSettings(request);
+
+		clearAliveTime();
 	});
 
 #pragma endregion
@@ -384,8 +428,12 @@ void WEBServer::initRouts() {
 		}
 
 		if (!this->handleFileRead("/network.html", request))
+		{
 			request->send(404, "text/plain", "FileNotFound");
-		});
+		}
+
+		clearAliveTime();
+	});
 
 	// /network
 	on("/network", HTTP_POST, [this](AsyncWebServerRequest* request) {
@@ -396,7 +444,9 @@ void WEBServer::initRouts() {
 		}
 
 		this->pageSendNetwork(request);
-		});
+
+		clearAliveTime();
+	});
 
 #pragma endregion
 
@@ -411,8 +461,12 @@ void WEBServer::initRouts() {
 		}
 
 		if (!this->handleFileRead("/mqtt.html", request))
+		{
 			request->send(404, "text/plain", "FileNotFound");
-		});
+		}
+
+		clearAliveTime();
+	});
 
 	// /mqtt
 	on("/mqtt", HTTP_POST, [this](AsyncWebServerRequest* request) {
@@ -423,7 +477,9 @@ void WEBServer::initRouts() {
 		}
 
 		this->pageSendMqtt(request);
-		});
+
+		clearAliveTime();
+	});
 
 #pragma endregion
 
@@ -445,6 +501,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendGeneralConfig(request);
+
+		clearAliveTime();
 	});
 
 	// Network values: IP, GW, DNS, MASK, ... .
@@ -456,6 +514,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendNetConfig(request);
+
+		clearAliveTime();
 	});
 
 	// Connection state values: connection state.
@@ -467,6 +527,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendConnState(request);
+
+		clearAliveTime();
 	});
 
 	// Information values: SSID, IP, GW, DNS, Mask, MAC, ... .
@@ -478,17 +540,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendConnInfo(request);
-	});
 
-	// DateTimeServer values: Server, Refresh time, TimeZone, DST.
-	on("/api/v1/ntp", [this](AsyncWebServerRequest *request) {
-		if (!this->isLoggedin(request))
-		{
-			this->goToLogin(request);
-			return;
-		}
-
-		//this->sendDTSCfgValues(request);
+		clearAliveTime();
 	});
 
 	// Scans WiFi networks.
@@ -500,6 +553,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendScannedNetworks(request);
+
+		clearAliveTime();
 	});
 	
 	// HTTP authentication.
@@ -511,6 +566,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendAuthCfg(request);
+
+		clearAliveTime();
 	});
 
 	// MQTT params.
@@ -522,6 +579,8 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendMqttCfg(request);
+
+		clearAliveTime();
 	});
 
 	// Stop device.
@@ -538,6 +597,8 @@ void WEBServer::initRouts() {
 		}
 
 		request->send(200, "text/plain", "");
+
+		clearAliveTime();
 	});
 
 	// Start device.
@@ -551,6 +612,24 @@ void WEBServer::initRouts() {
 		if (callbackStartDevice != nullptr)
 		{
 			callbackStartDevice();
+		}
+
+		request->send(200, "text/plain", "");
+
+		clearAliveTime();
+	});
+
+	// Reboot the controller.
+	on("/api/v1/reboot", [this](AsyncWebServerRequest* request) {
+		if (!this->isLoggedin(request))
+		{
+			this->goToLogin(request);
+			return;
+		}
+
+		if (callbackReboot != nullptr)
+		{
+			callbackReboot();
 		}
 
 		request->send(200, "text/plain", "");
@@ -1014,13 +1093,7 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 		{
 			DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
-#pragma region Device Name and HTTP Authentication
-
-			// https://www.guidgenerator.com/online-guid-generator.aspx
-			if (request->argName(index) == "deviceid") {
-				DeviceConfiguration.DeviceName = urlDecode(request->arg(index));
-				continue;
-			}
+#pragma region Authentication
 
 			// HTTP Authentication.
 			if (request->argName(index) == "user") {
@@ -1038,8 +1111,40 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 				}
 			}
 
+#pragma endregion
+
+#pragma region Device
+
+			// https://www.guidgenerator.com/online-guid-generator.aspx
+			if (request->argName(index) == "deviceid") {
+				DeviceConfiguration.DeviceName = urlDecode(request->arg(index));
+				continue;
+			}
+
+
 			if (request->argName(index) == "baudrate") {
 				DeviceConfiguration.PortBaudrate = urlDecode(request->arg(index)).toInt();
+				continue;
+			}
+
+			
+			if (request->argName(index) == "acativation-code") {
+				DeviceConfiguration.ActivationCode = urlDecode(request->arg(index)).toInt();
+				continue;
+			}
+
+#pragma endregion
+
+#pragma region NTP
+
+			if (request->argName(index) == "ntp-domain") {
+				DeviceConfiguration.NTPDomain = urlDecode(request->arg(index));
+				continue;
+			}
+
+
+			if (request->argName(index) == "ntp-tz") {
+				DeviceConfiguration.NTPTimezone = urlDecode(request->arg(index)).toInt();
 				continue;
 			}
 
@@ -1047,7 +1152,7 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 		}
 
-		// Save HTTP configuration.
+		// Save configuration.
 		save_device_config(m_fileSystem, CONFIG_DEVICE);
 	}
 
@@ -1088,7 +1193,7 @@ void WEBServer::pageSendNetwork(AsyncWebServerRequest* request) {
 				String pass = urlDecode(request->arg(index));
 				if (pass != "")
 				{
-					NetworkConfiguration.Password = urlDecode(request->arg(index));
+					NetworkConfiguration.Password = pass;
 				}
 				continue;
 			}
@@ -1207,12 +1312,8 @@ void WEBServer::pageSendNetwork(AsyncWebServerRequest* request) {
 
 		}
 
-		// Save HTTP configuration.
-		save_device_config(m_fileSystem, CONFIG_DEVICE);
-
 		// Save device configuration.
 		save_network_configuration(m_fileSystem, CONFIG_NET);
-
 	}
 
 	if (!this->handleFileRead("/network.html", request))
@@ -1303,9 +1404,12 @@ void WEBServer::apiSendGeneralConfig(AsyncWebServerRequest* request) {
 #endif // SHOW_FUNC_NAMES
 
 	String values = "";
-	values += "deviceid|" + (String)DeviceConfiguration.DeviceName + "|input\n";
 	values += "userversion|" + String(ESP_FW_VERSION) + "|div\n";
+	values += "deviceid|" + (String)DeviceConfiguration.DeviceName + "|input\n";
 	values += "baudrate|" + String(DeviceConfiguration.PortBaudrate) + "|select\n";
+	values += "ntp-domain|" + (String)DeviceConfiguration.NTPDomain + "|input\n";
+	values += "ntp-tz|" + String(DeviceConfiguration.NTPTimezone) + "|select\n";
+	values += "acativation-code|" + String(DeviceConfiguration.ActivationCode) + "|input\n";
 
 	request->send(200, "text/plain", values);
 }
@@ -1401,6 +1505,7 @@ void WEBServer::apiSendConnInfo(AsyncWebServerRequest *request) {
 	values += "x_gateway|" + (String)WiFi.gatewayIP()[0] + "." + (String)WiFi.gatewayIP()[1] + "." + (String)WiFi.gatewayIP()[2] + "." + (String)WiFi.gatewayIP()[3] + "|div\n";
 	values += "x_dns|" + (String)WiFi.dnsIP()[0] + "." + (String)WiFi.dnsIP()[1] + "." + (String)WiFi.dnsIP()[2] + "." + (String)WiFi.dnsIP()[3] + "|div\n";
 	values += "x_mac|" + MACL + "|div\n";
+	values += "x_rssi|" + String(WiFi.RSSI()) + "|div\n";
 
 	AsyncResponseStream *response = request->beginResponseStream("text/html");
 	// Add header.
@@ -1495,32 +1600,6 @@ void WEBServer::apiSendMqttCfg(AsyncWebServerRequest* request) {
 	request->send(200, "text/plain", values);
 }
 
-/** @brief Execute every one second, if attached event. Part of the API.
- *  @return Void.
- */
-void WEBServer::apiSendDeviceState() {
-/*
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-*/
-	m_webSocketEvents.send(dev_state_to_json(&DeviceState).c_str(), "deviceState");
-
-	DeviceState.BumpersAndWheelDrops++;
-	DeviceState.Wall = !DeviceState.Wall;
-	DeviceState.CliffLeft = !DeviceState.CliffLeft;
-	DeviceState.CliffFrontLeft = !DeviceState.CliffFrontLeft;
-	DeviceState.CliffFrontRight = !DeviceState.CliffFrontRight;
-	DeviceState.CliffRight = !DeviceState.CliffRight;
-
-	if (DeviceState.BumpersAndWheelDrops > 15)
-	{
-		DeviceState.BumpersAndWheelDrops = 0;
-	}
-}
-
 /** @brief Check the authorization status.
  *  @param request, AsyncWebServer Request request object.
  *  @return boolean, True have to authenticate.
@@ -1554,14 +1633,28 @@ void WEBServer::goToLogin(AsyncWebServerRequest* request) {
 	request->send(response);
 }
 
+/** @brief Clear keep alive counter.
+ *  @return Void.
+ */
+void WEBServer::clearAliveTime()
+{
+	m_keepAliveTime = 0;
+}
+
 /** @brief Execute every one second.
  *  @param arg, void Execution arguments.
  *  @return Void.
  */
 void WEBServer::s_secondTick(void* arg) {
+	// Get instance.
 	WEBServer* self = reinterpret_cast<WEBServer*>(arg);
-	if (self->m_webSocketEvents.count() > 0) {
-		self->apiSendDeviceState();
+
+	// Keep alive.
+	self->m_keepAliveTime++;
+	if (self->m_keepAliveTime > ALIVE_TIME)
+	{
+		self->clearAliveTime();
+		self->m_Cookie = self->genSession();
 	}
 }
 
