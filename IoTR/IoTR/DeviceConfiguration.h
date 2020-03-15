@@ -64,6 +64,10 @@ typedef struct {
 	String Password = DEAFULT_PASS; ///< Password. Set default value.
 	String DeviceName = DEVICE_BRAND; ///< Device name.
 	int PortBaudrate = DEVICE_BAUDRATE; ///< Remote device baudrate.
+	String NTPDomain = DEFAULT_NTP_DOMAIN; ///< NTP Domain.
+	int NTPPort = DEFAULT_NTP_PORT; ///< NTP Port.
+	int NTPTimezone = DEFAULT_NTP_TIMEZONE; ///< NTP Timezone offset.
+	int ActivationCode = 0; ///< Activation Code.
 } DeviceConfiguration_t;
 
 #pragma endregion

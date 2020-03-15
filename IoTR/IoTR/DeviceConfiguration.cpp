@@ -71,10 +71,18 @@ bool load_device_config(FS* fileSystem, const char* path) {
 	DEBUGLOG("%s\r\n", temp.c_str());
 #endif // SHOW_CONFIG
 
+	// Logins
 	DeviceConfiguration.Username = doc["user"].as<String>();
 	DeviceConfiguration.Password = doc["pass"].as<String>();
+	// Device
 	DeviceConfiguration.DeviceName = doc["device_name"].as<String>();
 	DeviceConfiguration.PortBaudrate = doc["port_baudrate"].as<int>();
+	// NTP
+	DeviceConfiguration.NTPDomain = doc["ntp_domain"].as<String>();
+	DeviceConfiguration.NTPPort = doc["ntp_port"].as<int>();
+	DeviceConfiguration.NTPTimezone = doc["ntp_tz"].as<int>();
+	// Activation code.
+	DeviceConfiguration.ActivationCode = doc["activation_code"].as<int>();
 
 	return true;
 }
@@ -91,10 +99,18 @@ bool save_device_config(FS* fileSystem, const char* path) {
 
 	//flag_config = false;
 	DynamicJsonDocument doc(256);
+	// Logins
 	doc["user"] = DeviceConfiguration.Username;
 	doc["pass"] = DeviceConfiguration.Password;
+	// Device
 	doc["device_name"] = DeviceConfiguration.DeviceName;
 	doc["port_baudrate"] = DeviceConfiguration.PortBaudrate;
+	// NTP
+	doc["ntp_domain"] = DeviceConfiguration.NTPDomain;
+	doc["ntp_port"] = DeviceConfiguration.NTPPort;
+	doc["ntp_tz"] = DeviceConfiguration.NTPTimezone;
+	// Activation code.
+	doc["activation_code"] = DeviceConfiguration.ActivationCode;
 
 	File file = fileSystem->open(path, "w");
 
@@ -122,10 +138,18 @@ bool set_default_device_config() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+	// Logins
 	DeviceConfiguration.Username = DEAFULT_USER;
 	DeviceConfiguration.Password = DEAFULT_PASS;
+	// Device
 	DeviceConfiguration.DeviceName = DEVICE_BRAND;
 	DeviceConfiguration.PortBaudrate = DEVICE_BAUDRATE;
+	// NTP
+	DeviceConfiguration.NTPDomain = DEFAULT_NTP_DOMAIN;
+	DeviceConfiguration.NTPPort = DEFAULT_NTP_PORT;
+	DeviceConfiguration.NTPTimezone = DEFAULT_NTP_TIMEZONE;
+	// Activation Code.
+	DeviceConfiguration.ActivationCode = 0;
 }
 
 

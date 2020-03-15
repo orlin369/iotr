@@ -69,7 +69,6 @@ typedef struct {
 	IPAddress  Gateway; ///< Local gateway.
 	IPAddress  DNS; ///< Local DNS.
 	bool DHCP; ///< DHCP enable flag.
-	String NTPDomain; ///< NTP Server domain.
 } NetworkConfiguration_t;
 
 #pragma endregion
