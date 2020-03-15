@@ -27,15 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // SDK
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 #endif // ESP8266
 #ifdef ESP32
 #include <WiFi.h>
 #endif // ESP32
 #include <WiFiClient.h>
-#include <WiFiUdp.h>
 #include <FS.h>
 
 #include <AsyncMqttClient.h>
+#include <NTPClient.h>
 
 /* Debug serial port. */
 #include "DebugPort.h"
@@ -50,12 +51,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "FxTimer.h"
 
+#include "DeviceState.h"
+
+#include "DeviceStatus.h"
+
 #ifdef ENABLE_ARDUINO_OTA
 #include <ArduinoOTA.h>
 #endif // ENABLE_ARDUINO_OTA
 
 #ifdef ENABLE_HTTP_OTA
-// TODO: Make call from the device monitoring service.
 #include "UpdatesManager.h"
 #endif // ENABLE_HTTP_OTA
 
@@ -76,10 +80,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma endregion
 
 #pragma region Variables
+WiFiUDP ntpUDP;
+
+NTPClient NTPClient_g(ntpUDP);
 
 FxTimer WiFiConnTimer_g = FxTimer();
 
-FxTimer MQTTConnTimer_g;
+FxTimer MQTTConnTimer_g = FxTimer();
+
+FxTimer HeartbeatTimer_g = FxTimer();
+
+FxTimer DeviceStateTimer_g = FxTimer();
 
 AsyncMqttClient MQTTClient_g;
 
@@ -367,47 +378,17 @@ void configure_web_server() {
 	LocalWEBServer.begin(&SPIFFS);
 	LocalWEBServer.setCbStopDevice(stop_device);
 	LocalWEBServer.setCbStartDevice(start_device);
+	LocalWEBServer.setCbReboot(reboot);
 }
 
-#pragma endregion
-
-#pragma region Command Module
-
-void configure_command_module() {
+void reboot() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.init(PIN_LED2, PIN_LED3);
-	CommandModule.restart();
-#endif // ENABLE_DEVICE_CONTROL
-}
-
-void stop_device() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.stop();
-#endif // ENABLE_DEVICE_CONTROL
-}
-
-void start_device() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.start();
-#endif // ENABLE_DEVICE_CONTROL
+	ESP.restart();
 }
 
 #pragma endregion
@@ -482,6 +463,7 @@ void configure_arduino_ota() {
 
 #pragma endregion
 
+
 #pragma region MQTT Service
 
 void onMqttConnect(bool sessionPresent) {
@@ -491,20 +473,23 @@ void onMqttConnect(bool sessionPresent) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	DEBUGLOG("Connected to MQTT.\r\n");
-	DEBUGLOG("Session present: %d\r\n", sessionPresent);
+	//DEBUGLOG("Connected to MQTT.\r\n");
+	//DEBUGLOG("Session present: %d\r\n", sessionPresent);
 
-	uint16_t packetIdSub = MQTTClient_g.subscribe("test/lol", 2);
-	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub);
+	//uint16_t packetIdSub = MQTTClient_g.subscribe("test/A0", 2);
+	//DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub);
 
-	MQTTClient_g.publish("test/lol", 0, true, "test 1");
-	DEBUGLOG("Publishing at QoS 0\r\n");
+	//uint16_t packetIdSub2 = MQTTClient_g.subscribe("test/TIME", 2);
+	//DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub2);
 
-	uint16_t packetIdPub1 = MQTTClient_g.publish("test/lol", 1, true, "test 2");
-	DEBUGLOG("Publishing at QoS 1, packetId: %d\r\n", packetIdPub1);
+	//MQTTClient_g.publish("test/lol", 0, true, "test 1");
+	//DEBUGLOG("Publishing at QoS 0\r\n");
 
-	uint16_t packetIdPub2 = MQTTClient_g.publish("test/lol", 2, true, "test 3");
-	DEBUGLOG("Publishing at QoS 2, packetId: %d\r\n", packetIdPub2);
+	//uint16_t packetIdPub1 = MQTTClient_g.publish("test/lol", 1, true, "test 2");
+	//DEBUGLOG("Publishing at QoS 1, packetId: %d\r\n", packetIdPub1);
+
+	//uint16_t packetIdPub2 = MQTTClient_g.publish("test/lol", 2, true, "test 3");
+	//DEBUGLOG("Publishing at QoS 2, packetId: %d\r\n", packetIdPub2);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -593,7 +578,6 @@ void mqtt_begin() {
 	MQTTClient_g.onPublish(onMqttPublish);
 	MQTTClient_g.setServer(MqttConfiguration.Domain.c_str(), MqttConfiguration.Port);
 
-	MQTTConnTimer_g = FxTimer();
 	MQTTConnTimer_g.setExpirationTime(5000);
 }
 
@@ -620,6 +604,93 @@ void mqtt_reconnect()
 
 		MQTTClient_g.connect();
 	}
+}
+
+#pragma endregion
+
+#pragma region NTP
+
+void configure_ntp() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	NTPClient_g.setPoolServerName(DeviceConfiguration.NTPDomain.c_str());
+	NTPClient_g.setTimeOffset(DeviceConfiguration.NTPTimezone);
+	NTPClient_g.setUpdateInterval(NTP_UPDATE_INTERVAL);
+	NTPClient_g.begin(DEFAULT_NTP_PORT);
+}
+
+#pragma endregion
+
+#pragma region Command Module
+
+void configure_command_module() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+#ifdef ENABLE_DEVICE_CONTROL
+	CommandModule.init(PIN_LED2, PIN_LED3);
+	CommandModule.setState(StateType::Restart);
+#endif // ENABLE_DEVICE_CONTROL
+}
+
+void stop_device() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+#ifdef ENABLE_DEVICE_CONTROL
+	CommandModule.enable(false);
+#endif // ENABLE_DEVICE_CONTROL
+}
+
+void start_device() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+#ifdef ENABLE_DEVICE_CONTROL
+	CommandModule.enable(true);
+#endif // ENABLE_DEVICE_CONTROL
+}
+
+/** @brief Read incoming data from the serial buffer.
+ *  @return Void.
+ */
+void read_device_statue()
+{
+	static String IncommingCommnad = "";
+
+	// Fill the command data buffer with command.
+	while (Serial.available())
+	{
+		// Add new char.
+		IncommingCommnad += (char)Serial.read();
+		// Wait a while for a a new char.
+		delay(5);
+		//ESP.wdtFeed();
+		yield();
+	}
+
+	// If command if not empty parse it.
+	if (IncommingCommnad != "")
+	{
+		// Publish message.
+		MQTTClient_g.publish("test/device/out", 2, true, IncommingCommnad.c_str());
+	}
+
+	// Clear the command data buffer.
+	IncommingCommnad = "";
 }
 
 #pragma endregion
@@ -670,6 +741,8 @@ void setup()
 	if (NetworkConfiguration.SSID != "" && NetworkConfiguration.Password != "")
 	{
 		configure_to_sta();
+		NTPClient_g.update();
+		HeartbeatTimer_g.setExpirationTime(HEARTBEAT_TIME);
 #ifdef ENABLE_STATUS_LED
 		StatusLed.setAnumation(AnimationType::Green);
 #endif // ENABLE_STATUS_LED
@@ -682,6 +755,7 @@ void setup()
 #endif // ENABLE_STATUS_LED
 	}
 
+	DeviceStateTimer_g.setExpirationTime(1000);
 	configure_web_server();
 
 #ifdef ENABLE_IR_INTERFACE
@@ -700,15 +774,68 @@ void setup()
 
 void loop()
 {
-	// 
-	LocalWEBServer.update();
+	static unsigned long datetime;
+
+#ifdef ENABLE_DEVICE_CONTROL
+	CommandModule.update();
+#endif // ENABLE_DEVICE_CONTROL
 
 	// 
+	LocalWEBServer.update();
+	DeviceStateTimer_g.update();
+	if (DeviceStateTimer_g.expired())
+	{
+		DeviceStateTimer_g.clear();
+
+		LocalWEBServer.sendDeviceState(dev_state_to_json());
+
+		DeviceState.BumpersAndWheelDrops++;
+		DeviceState.Wall = !DeviceState.Wall;
+		DeviceState.CliffLeft = !DeviceState.CliffLeft;
+		DeviceState.CliffFrontLeft = !DeviceState.CliffFrontLeft;
+		DeviceState.CliffFrontRight = !DeviceState.CliffFrontRight;
+		DeviceState.CliffRight = !DeviceState.CliffRight;
+
+		if (DeviceState.BumpersAndWheelDrops > 15)
+		{
+			DeviceState.BumpersAndWheelDrops = 0;
+		}
+	}
+
+	// If everything is OK with the transport layer.
 	if ((WiFi.getMode() == WIFI_STA) && WiFi.isConnected())
 	{
+		// Update date and time.
+		NTPClient_g.update();
+
+		// Reconnect MQTT if nasisery.
 		if (!MQTTClient_g.connected())
 		{
 			mqtt_reconnect();
+		}
+		else
+		{
+			read_device_statue();
+		}
+
+		// If heartbeat expired then run trought.
+		HeartbeatTimer_g.update();
+		if (HeartbeatTimer_g.expired())
+		{
+			HeartbeatTimer_g.clear();
+			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
+
+			DeviceStatus.Timestamp = NTPClient_g.getEpochTime() - DeviceConfiguration.NTPTimezone;
+			DeviceStatus.Voltage = map(analogRead(A0), 0, 1023, 0, 3.3);
+			DeviceStatus.RSSI = WiFi.RSSI();
+			DeviceStatus.SSID = NetworkConfiguration.SSID;
+			DeviceStatus.Flags = 0;
+			// TODO: Flags
+
+			if (MQTTClient_g.connected())
+			{
+				MQTTClient_g.publish("test/device/state", 0, true, dev_status_to_json().c_str());
+			}
 		}
 	}
 
@@ -721,6 +848,23 @@ void loop()
 	{
 		LocalWEBServer.displayIRCommand(IRResults_g.command);
 		IRReciver_g.resume();  // Receive the next value
+#ifdef ENABLE_DEVICE_CONTROL
+		if (IRResults_g.command == DeviceConfiguration.ActivationCode)
+		{
+			if (CommandModule.getState() == StateType::Start)
+			{
+				CommandModule.setState(StateType::Stop);
+			}
+			else if (CommandModule.getState() == StateType::Stop)
+			{
+				CommandModule.setState(StateType::Restart);
+			}
+			else if (CommandModule.getState() == StateType::Restart)
+			{
+				CommandModule.setState(StateType::Start);
+			}
+		}
+#endif // ENABLE_DEVICE_CONTROL
 	}
 #endif // ENABLE_IR_INTERFACE
 
