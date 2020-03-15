@@ -34,18 +34,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "DebugPort.h"
 
+/** @brief Frame indexes byte. */
+enum StateType : int
+{
+	Init = 0, ///< Red fade animation.
+	Start, ///< Start the device.
+	Stop, ///< Stop the device
+	Restart, ///< Restart
+};
+
 class CommandModuleClass
 {
  protected:
+	 bool m_enabled = false;
 	 uint8_t m_pinStart;
 	 uint8_t m_pinKill;
+	 int m_state = StateType::Init;
+	 void restart();
+	 void start();
+	 void stop();
 
  public:
 	void init(uint8_t pin_start, uint8_t pin_kill);
-	void restart();
-	void start();
-	void stop();
-
+	void setState(int state);
+	int getState();
+	void update();
+	void enable(bool enabled);
 };
 
 extern CommandModuleClass CommandModule;
