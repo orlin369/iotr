@@ -33,9 +33,6 @@
     <ClInclude Include="CommandModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Communicator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DebugPort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
