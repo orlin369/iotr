@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Robot Monitor - SETTINGS</title>
+        <title>IoTR - SETTINGS</title>
         <link href="style.min.css" rel="stylesheet" type="text/css">
         <style>
             /* CSS RESET */
@@ -298,7 +298,7 @@
         <div class="nav fixed grid-container">
             <div class="col xs-no md-1"></div>
             <div class="col xs-12 sm-7 md-6">
-                <span class="logo">Robot Monitor v1.0&nbsp;|</span>
+                <span class="logo">IoTR&nbsp;|</span>
                 <ul>
                     <li class="active"><a href="/dashboard" class="link">Dashboard</a></li>
                     <li><a href="/settings" class="link">Settings</a></li>
@@ -352,7 +352,7 @@
         <div class="grid-container">
             <div class="row footer">
                 <div class="col xs-12 md-10 footer text-center-xs">
-                    <p style="padding-top: 10px;"><strong>Robot Monitor Dashboard</strong> was designed and built by Orlin Dimitrov.</p>
+                    <p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
                 </div>
             </div>
         </div>
@@ -558,10 +558,17 @@
                 var eventSource = new EventSource(url);
 
                 function addMessage(m){
-                    var msg = document.createElement("div");
-                    msg.innerText = m;
-                    document.getElementById(viewElement).appendChild(msg);
-                    // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                    if (viewElement != null)
+                    {
+                        var msg = document.createElement("div");
+                        msg.innerText = m;
+                        document.getElementById(viewElement).appendChild(msg);
+                        // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);    
+                    }
+                    else
+                    {
+                        console.log(m);
+                    }
                 }
 
                 this.init = function()
@@ -589,7 +596,7 @@
                         addMessage("Event[irCommand]: " + e.data);
                     }, false);
                 }
-            }
+}
 
             function Logger(url, topic, viewElement) {
 

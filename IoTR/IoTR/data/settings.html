@@ -5,14 +5,14 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="style.min.css" rel="stylesheet" type="text/css">
-        <title>Robot Monitor - SETTINGS</title>
+        <title>IoTR - SETTINGS</title>
     </head>
     <body class="with-fixed-menu">
         <input type="checkbox" class="hidden" id="nav-toggle" autocomplete="off">
         <div class="nav fixed grid-container">
             <div class="col xs-no md-1"></div>
             <div class="col xs-12 sm-7 md-6">
-                <span class="logo">Robot Monitor v1.0&nbsp;|</span>
+                <span class="logo">IoTR&nbsp;|</span>
                 <ul>
                     <li><a href="/dashboard" class="link">Dashboard</a></li>
                     <li class="active"><a href="/settings" class="link">Settings</a></li>
@@ -35,7 +35,7 @@
         <label for="nav-toggle"></label>
         <div class="grid-container">
             <div class="row">
-                <div class="col xs-no md-3"></div>
+                <!-- System -->
                 <div class="col xs-12 md-6">
                     <form action="" method="post" class="section">
                         <fieldset>
@@ -59,6 +59,84 @@
                                 </div>
                                 <div class="row">
                                     <div class="col xs-12 md-3 text-right">
+                                        <label for="baudrate" class="form-label">Baudrate:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <select id="baudrate" name="baudrate" class="form-control" placeholder="9600">
+                                            <option value="2400">2400</option>
+                                            <option value="4800">4800</option>
+                                            <option value="9600">9600</option>
+                                            <option value="19200">19200</option>
+                                            <option value="38400">38400</option>
+                                            <option value="57600">57600</option>
+                                            <option value="115200">115200</option>
+                                          </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label class="form-label">Activation code:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="acativation-code" name="acativation-code" value="" class="form-control" placeholder="Activation Code" required="required"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label class="form-label">Reboot device:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <a href="javascript:rebootDevice();" class="btn btn--m btn--blue">Reboot</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <input type="submit" class="form-control" value="Save">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <!-- NTP -->
+                <div class="col xs-12 md-6">
+                    <form action="" method="post" class="section">
+                        <fieldset>
+                            <legend>NTP Server</legend>
+                            <div class="grid-container">
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="ntp-domain" class="form-label">NTP Server:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="ntp-domain" name="ntp-domain" value="" class="form-control" placeholder="NTP Domain"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="ntp-tz" class="form-label">Timezone:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <select id="ntp-tz" name="ntp-tz" class="form-control" placeholder="+2" required="required">
+                                            <option value="0">+0</option>
+                                            <option value="1">+1</option>
+                                            <option value="2">+2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <input type="submit" class="form-control" value="Save">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <!-- Credentils -->
+                <div class="col xs-12 md-6">
+                    <form action="" method="post" class="section">
+                        <fieldset>
+                            <legend>Credentials</legend>
+                            <div class="grid-container">
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
                                         <label for="user" class="form-label">User:</label>
                                     </div>
                                     <div class="col xs-12 md-8">
@@ -74,22 +152,6 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col xs-12 md-3 text-right">
-                                        <label for="baudrate" class="form-label">Baudrate:</label>
-                                    </div>
-                                    <div class="col xs-12 md-8">
-                                        <select id="baudrate" name="baudrate" class="form-control" placeholder="9600" required="required">
-                                            <option value="2400">2400</option>
-                                            <option value="4800">4800</option>
-                                            <option value="9600">9600</option>
-                                            <option value="19200">19200</option>
-                                            <option value="38400">38400</option>
-                                            <option value="57600">57600</option>
-                                            <option value="115200">115200</option>
-                                          </select>
-                                    </div>
-                                </div>
-                                <div class="row">
                                     <input type="submit" class="form-control" value="Save">
                                 </div>
                             </div>
@@ -99,7 +161,7 @@
                 <div class="row footer">
                     <div class="col xs-no md-1"></div>
                     <div class="col xs-12 md-10 footer text-center-xs">
-                        <p style="padding-top: 10px;"><strong>Robot Monitor Dashboard</strong> was designed and built by Orlin Dimitrov.</p>
+                        <p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
                     </div>
                 </div>
             </div>
@@ -110,6 +172,11 @@
             function formatTwoDigits(i) {
                 if (i < 10) {i = '0' + i};// add zero in front of numbers < 10
                 return i;
+            }
+
+            function rebootDevice() {
+                // HTTP Authentication.
+                setValues('/api/v1/reboot');
             }
 
             function startTime() {
@@ -143,10 +210,46 @@
                 setValues('/api/v1/auth');
             }
 
+
+            function IRCommands(url, topic) {
+                var topic = topic;
+                var eventSource = new EventSource(url);
+
+                this.init = function()
+                {
+                    eventSource.onopen = function(e) {
+                        console.log("IR Opened");
+                    };
+                    eventSource.onerror = function(e) {
+                        if (e.target.readyState != EventSource.OPEN) {
+                            console.log("IR Closed");
+                        }
+                    };
+                    eventSource.onmessage = function(e) {
+                        console.log("Event: " + e.data);
+                    };
+                    eventSource.addEventListener(topic, function(e) {
+                        if (!e.data)
+                        {
+                            return;
+                        }
+                        
+                        console.log(e.data);
+                        var field = document.getElementById("acativation-code");
+                        field.value = e.data;
+                    }, false);
+                }
+            }
+
+
             window.onload = function () {
                 startTime();
                 setTimeout(getGeneralValues, 500);
                 setTimeout(getHTTPAuth, 1000);
+                var url = "/api/v1/events";
+
+                var irCommands = new IRCommands(url, "irCommand");
+                irCommands.init();
             }
 
         </script>
