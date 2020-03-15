@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "DeviceState.h"
 
-/* @brief Singelton Smart scale server instance. */
+/* @brief Singelton device state instance. */
 DeviceState_t DeviceState;
 
-String dev_state_to_json(DeviceState_t* state) {
+String dev_state_to_json() {
 /*
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -40,12 +40,12 @@ String dev_state_to_json(DeviceState_t* state) {
 	//flag_config = false;
 	DynamicJsonDocument doc(512);
 
-	doc["Wall"] = state->Wall;
-	doc["CliffLeft"] = state->CliffLeft;
-	doc["CliffFrontLeft"] = state->CliffFrontLeft;
-	doc["CliffFrontRight"] = state->CliffFrontRight;
-	doc["CliffRight"] = state->CliffRight;
-	doc["BumpersAndWheelDrops"] = state->BumpersAndWheelDrops;
+	doc["Wall"] = DeviceState.Wall;
+	doc["CliffLeft"] = DeviceState.CliffLeft;
+	doc["CliffFrontLeft"] = DeviceState.CliffFrontLeft;
+	doc["CliffFrontRight"] = DeviceState.CliffFrontRight;
+	doc["CliffRight"] = DeviceState.CliffRight;
+	doc["BumpersAndWheelDrops"] = DeviceState.BumpersAndWheelDrops;
 
 	String content = "";
 

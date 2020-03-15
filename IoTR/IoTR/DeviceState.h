@@ -43,10 +43,10 @@ typedef struct {
 	uint8_t BumpersAndWheelDrops = false; ///< Device name.
 } DeviceState_t;
 
-/* @brief Singelton Smart scale server instance. */
+/* @brief Singelton device state. */
 extern DeviceState_t DeviceState;
 
-String dev_state_to_json(DeviceState_t* state);
+String dev_state_to_json();
 
 #endif
 
