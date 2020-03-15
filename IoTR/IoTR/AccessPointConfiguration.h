@@ -44,7 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Access point configuration structure, it hold configuration parameters values.
  */
-// TODO: Refactor.
 typedef struct {
 	String SSID; ///< APssid - ChipID is appended to this name.
 	String Password = DEFAULT_AP_PASSWORD; ///< APpassword - AP Password string.
