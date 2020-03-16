@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
@@ -80,9 +80,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma endregion
 
 #pragma region Variables
-WiFiUDP ntpUDP;
 
-NTPClient NTPClient_g(ntpUDP);
+WiFiUDP NTP_UDP_g;
+
+NTPClient NTPClient_g(NTP_UDP_g);
 
 FxTimer WiFiConnTimer_g = FxTimer();
 
@@ -97,7 +98,7 @@ AsyncMqttClient MQTTClient_g;
 #ifdef ENABLE_IR_INTERFACE
 
 /* @brief IR reciver. */
-IRrecv IRReciver_g(RECV_PIN);
+IRrecv IRReciver_g(PIN_IR_RECV);
 
 /* @brief IR reciever result. */
 decode_results IRResults_g;
@@ -463,7 +464,6 @@ void configure_arduino_ota() {
 
 #pragma endregion
 
-
 #pragma region MQTT Service
 
 void onMqttConnect(bool sessionPresent) {
@@ -774,8 +774,6 @@ void setup()
 
 void loop()
 {
-	static unsigned long datetime;
-
 #ifdef ENABLE_DEVICE_CONTROL
 	CommandModule.update();
 #endif // ENABLE_DEVICE_CONTROL
@@ -787,6 +785,7 @@ void loop()
 	{
 		DeviceStateTimer_g.clear();
 
+		LocalWEBServer.sendDeviceStatus(dev_status_to_json());
 		LocalWEBServer.sendDeviceState(dev_state_to_json());
 
 		DeviceState.BumpersAndWheelDrops++;
@@ -825,7 +824,7 @@ void loop()
 			HeartbeatTimer_g.clear();
 			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
 
-			DeviceStatus.Timestamp = NTPClient_g.getEpochTime() - DeviceConfiguration.NTPTimezone;
+			DeviceStatus.Timestamp = NTPClient_g.getEpochTime(); // -DeviceConfiguration.NTPTimezone;
 			DeviceStatus.Voltage = map(analogRead(A0), 0, 1023, 0, 3.3);
 			DeviceStatus.RSSI = WiFi.RSSI();
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
