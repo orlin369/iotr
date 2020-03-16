@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
@@ -126,7 +126,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Debug Terminal Configuration
 
 /** @brief Debug output port. */
-#define DBG_OUTPUT_PORT Serial // Serial1 // on D4
+#define DBG_OUTPUT_PORT Serial1 // Serial1 // on D4
 
 /** @brief Debug output port baud rate. */
 #define DBG_OUTPUT_PORT_BAUDRATE 115200
@@ -222,7 +222,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region IR Configuration
 
 #ifdef ENABLE_IR_INTERFACE
-#define RECV_PIN D4
+#define PIN_IR_RECV D5
 #endif // ENABLE_IR_INTERFACE
 
 #pragma endregion
