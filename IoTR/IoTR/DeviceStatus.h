@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
@@ -32,8 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ApplicationConfiguration.h"
 
-#include <ArduinoJson.h>
-
 /*
 {
 	"ts": 1584114705,
@@ -41,7 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	"target_voltage": 5.0,
 	"ssid": "name",
 	"rssi": -97,
-
 }
 */
 

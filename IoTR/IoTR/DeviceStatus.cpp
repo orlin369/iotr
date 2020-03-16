@@ -17,19 +17,16 @@ String dev_status_to_json()
 #endif // SHOW_FUNC_NAMES
 */
 
-//flag_config = false;
-	DynamicJsonDocument doc(512);
+	String json = "";
+	json += "{";
+	json += "\"ts\":" + String(DeviceStatus.Timestamp);
+	json += ",\"rssi\":" + String(DeviceStatus.RSSI);
+	json += ",\"ssid\":\"" + DeviceStatus.SSID + "\"";
+	json += ",\"voltage\":" + String(DeviceStatus.Voltage);
+	json += ",\"flags\":" + String(DeviceStatus.Flags);
+	json += "}";
 
-	doc["ts"] = DeviceStatus.Timestamp;
-	doc["flags"] = DeviceStatus.Flags;
-	doc["voltage"] = DeviceStatus.Voltage;
-	doc["ssid"] = DeviceStatus.SSID;
-	doc["rssi"] = DeviceStatus.RSSI;
+	//DEBUGLOG("%s\r\n", json.c_str());
 
-	String content = "";
-
-	serializeJson(doc, content);
-	//DEBUGLOG("%s\r\n", content.c_str());
-
-	return content;
+	return json;
 }
