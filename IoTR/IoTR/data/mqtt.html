@@ -24,12 +24,14 @@
             </div>
             <div class="col xs-12 sm-3 md-4 text-right">
                 <div class="head-right">
-                    <span id="clock">00.00.0000/00:00:00</span>
+                    <span id="h-clock">00.00.0000/00:00:00</span>
                     <span>|</span>
-                    <span>127.0.0.1</span>
+                    <span id="h-ssid">SSID</span>
+                    <span>|</span>
+                    <span id="h-rssi">RSSI</span>
+                    <span>|</span>
+                    <span id="h-voltage">0.0V</span>
                 </div>
-            </div>
-            <div class="col xs-no md-1">
             </div>
         </div>
         <label for="nav-toggle"></label>
@@ -63,7 +65,7 @@
                                         <label for="user" class="form-label">User:</label>
                                     </div>
                                     <div class="col xs-12 md-8">
-                                        <input type="text" id="user" name="user" value="" class="form-control" placeholder="user" required="required"/>
+                                        <input type="text" id="user" name="user" value="" class="form-control" placeholder="User"/>
                                     </div>
                                 </div>
                                 <!--PASS-->
@@ -72,7 +74,7 @@
                                         <label for="password" class="form-label">Password:</label>
                                     </div>
                                     <div class="col xs-12 md-8">
-                                        <input type="password" id="password" name="password" value="" class="form-control" placeholder="Password" />
+                                        <input type="password" id="password" name="password" value="" class="form-control" placeholder="Password"/>
                                     </div>
                                 </div>
                                 <!--Authentication-->
@@ -99,44 +101,21 @@
             </div>
         </div>
         <script language="javascript" type="text/javascript" src="/microajax.js"></script>
-        <!-- Javascript test -->
+        <script language="javascript" type="text/javascript" src="/dev_status.js"></script>
         <script language='javascript' type='text/javascript'>
 
-function formatTwoDigits(i) {
-    if (i < 10) {i = '0' + i};// add zero in front of numbers < 10
-    return i;
-}
+            function getMqttValues() {
+                // Device name and version.
+                setValues('/api/v1/mqtt');
+            }
 
-function startTime() {
-    var today = new Date();
-    var years = today.getFullYear();
-    var month = today.getMonth();
-    var date = today.getDate();
-    var hours = today.getHours();
-    var minutes = today.getMinutes();
-    var seconds = today.getSeconds();
+            window.onload = function () {
+                var url = "/api/v1/events";
+                var deviceStatus = new DeviceStatus(url);
+                deviceStatus.init();
 
-    date = formatTwoDigits(date);
-    month = formatTwoDigits(month);
-    hours = formatTwoDigits(hours);
-    minutes = formatTwoDigits(minutes);
-    seconds = formatTwoDigits(seconds);
-
-    var clockText = date + '.' + month + '.' + years + '/' + hours + ':' + minutes + ':' + seconds;
-    document.getElementById('clock').innerHTML = clockText;
-
-    var t = setTimeout(startTime, 500);
-}
-
-function getMqttValues() {
-    // Device name and version.
-    setValues('/api/v1/mqtt');
-}
-
-window.onload = function () {
-    startTime();
-    setTimeout(getMqttValues, 500);
-}
+                setTimeout(getMqttValues, 500);
+            }
         </script>
     </body>
 </html>

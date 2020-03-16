@@ -310,12 +310,14 @@
             </div>
             <div class="col xs-12 sm-3 md-4 text-right">
                 <div class="head-right">
-                    <span id="clock">00.00.0000/00:00:00</span>
+                    <span id="h-clock">00.00.0000/00:00:00</span>
                     <span>|</span>
-                    <span>127.0.0.1</span>
+                    <span id="h-ssid">SSID</span>
+                    <span>|</span>
+                    <span id="h-rssi">RSSI</span>
+                    <span>|</span>
+                    <span id="h-voltage">0.0V</span>
                 </div>
-            </div>
-            <div class="col xs-no md-1">
             </div>
         </div>
         <label for="nav-toggle"></label>
@@ -357,33 +359,8 @@
             </div>
         </div>
         <script language="javascript" type="text/javascript" src="/microajax.js"></script>
+        <script language="javascript" type="text/javascript" src="/dev_status.js"></script>
         <script language='javascript' type='text/javascript'>
-
-            function formatTwoDigits(i) {
-                if (i < 10) {i = '0' + i};// add zero in front of numbers < 10
-                return i;
-            }
-
-            function startTime() {
-                var today = new Date();
-                var years = today.getFullYear();
-                var month = today.getMonth();
-                var date = today.getDate();
-                var hours = today.getHours();
-                var minutes = today.getMinutes();
-                var seconds = today.getSeconds();
-
-                date = formatTwoDigits(date);
-                month = formatTwoDigits(month);
-                hours = formatTwoDigits(hours);
-                minutes = formatTwoDigits(minutes);
-                seconds = formatTwoDigits(seconds);
-
-                var clockText = date + '.' + month + '.' + years + '/' + hours + ':' + minutes + ':' + seconds;
-                document.getElementById('clock').innerHTML = clockText;
-
-                var t = setTimeout(startTime, 500);
-            }
 
             function startDevice() {
                 // Device name and version.
@@ -645,7 +622,8 @@
                 var robot = new iRobot(url);
                 robot.init();
 
-                startTime();
+                var deviceStatus = new DeviceStatus(url);
+                deviceStatus.init();
             }
         </script>
     </body>
