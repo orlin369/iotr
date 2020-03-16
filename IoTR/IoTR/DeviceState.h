@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
