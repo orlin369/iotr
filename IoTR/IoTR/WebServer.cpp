@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
@@ -80,7 +80,7 @@ void WEBServer::begin(FS* fs) {
 	AsyncWebServer::begin();
 
 	// Task to run periodic things every second.
-	m_eventUpdater.attach(1.0f, &WEBServer::s_secondTick, static_cast<void*>(this));
+	m_eventUpdater.attach(1.0f, &WEBServer::eventUpdateHandler, static_cast<void*>(this));
 
 	clearAliveTime();
 }
@@ -117,7 +117,7 @@ void WEBServer::displayIRCommand(uint32_t command) {
 #endif // SHOW_FUNC_NAMES
 
 	if (m_webSocketEvents.count() > 0) {
-		m_webSocketEvents.send(String(command).c_str(), "irCommand");
+		m_webSocketEvents.send(String(command).c_str(), ESS_IR_CMD);
 	}
 }
 
@@ -125,21 +125,39 @@ void WEBServer::displayIRCommand(uint32_t command) {
  *  @return Void.
  */
 void WEBServer::sendDeviceState(String device_state) {
-	/*
-	#ifdef SHOW_FUNC_NAMES
-		DEBUGLOG("\r\n");
-		DEBUGLOG(__PRETTY_FUNCTION__);
-		DEBUGLOG("\r\n");
-	#endif // SHOW_FUNC_NAMES
-	*/
+/*
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+*/
 
 	// Chack does have someone connected.
 	if (m_webSocketEvents.count() > 0)
 	{
-		m_webSocketEvents.send(device_state.c_str(), "deviceState");
+		m_webSocketEvents.send(device_state.c_str(), ESS_DEV_STATE);
 	}
 }
 
+/** @brief Updates the header data.
+ *  @return Void.
+ */
+void WEBServer::sendDeviceStatus(String data) {
+/*
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+*/
+
+	// Chack does have someone connected.
+	if (m_webSocketEvents.count() > 0)
+	{
+		m_webSocketEvents.send(data.c_str(), ESS_DEV_STATUS);
+	}
+}
 
 /** @brief Set tare process function. Part of the API.
  *  @param callback, Start function.
@@ -152,7 +170,7 @@ void WEBServer::setCbStartDevice(void(*callback)(void)) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	callbackStartDevice = callback;
+	m_callbackStartDevice = callback;
 }
 
 /** @brief Set tare process function. Part of the API.
@@ -166,7 +184,7 @@ void WEBServer::setCbStopDevice(void(*callback)(void)) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	callbackStopDevice = callback;
+	m_callbackStopDevice = callback;
 }
 
 /** @brief Set reboot process function. Part of the API.
@@ -180,7 +198,7 @@ void WEBServer::setCbReboot(void(*callback)(void)) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	callbackReboot = callback;
+	m_callbackReboot = callback;
 }
 
 #pragma endregion
@@ -202,7 +220,7 @@ void WEBServer::initRouts() {
 #ifdef ENABLE_EDITOR
 
 	// List directory.
-	on("/list", HTTP_GET, [this](AsyncWebServerRequest *request) {
+	on(ROUT_EDITOR_LIST, HTTP_GET, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -213,7 +231,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Load editor.
-	on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request) {
+	on(ROUT_EDITOR, HTTP_GET, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -222,12 +240,12 @@ void WEBServer::initRouts() {
 
 		if (!this->handleFileRead("/edit.html", request))
 		{
-			request->send(404, "text/plain", "File Not Found!");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "File Not Found!");
 		}
 	});
 
 	// Create file.
-	on("/edit", HTTP_PUT, [this](AsyncWebServerRequest *request) {
+	on(ROUT_EDITOR, HTTP_PUT, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -238,7 +256,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Delete file.
-	on("/edit", HTTP_DELETE, [this](AsyncWebServerRequest *request) {
+	on(ROUT_EDITOR, HTTP_DELETE, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -250,7 +268,7 @@ void WEBServer::initRouts() {
 
 	// First callback is called after the request has ended with all parsed arguments.
 	// Second callback handles file uploads at that location.
-	on("/edit", HTTP_POST,
+	on(ROUT_EDITOR, HTTP_POST,
 		[this](AsyncWebServerRequest *request)
 		{
 			if (!this->isLoggedin(request))
@@ -259,7 +277,7 @@ void WEBServer::initRouts() {
 				return;
 			}
 
-			request->send(200, "text/plain", "");
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 		},
 		[this](AsyncWebServerRequest *request, String filename, size_t index, uint8 *data, size_t len, bool final)
 		{
@@ -279,13 +297,14 @@ void WEBServer::initRouts() {
 #pragma region Home page API
 
 	// /login
-	on("/", HTTP_GET, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_HOME, HTTP_GET, [this](AsyncWebServerRequest* request) {
 		if (this->isLoggedin(request))
 		{
 			AsyncWebServerResponse* response = request->beginResponse(301);
-			response->addHeader("Location", "/dashboard");
+			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			request->send(response);
+			// delete response; // Free up memory!
 		}
 		else
 		{
@@ -299,31 +318,33 @@ void WEBServer::initRouts() {
 
 	// https://rntlab.com/question/esp32-web-server-using-spiffs/
 	// /login
-	on("/login", HTTP_GET, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_LOGIN, HTTP_GET, [this](AsyncWebServerRequest* request) {
 		if (this->isLoggedin(request))
 		{
 			AsyncWebServerResponse* response = request->beginResponse(301);
-			response->addHeader("Location", "/dashboard");
+			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			request->send(response);
+			// delete response; // Free up memory!
 		}
 		else
 		{
 			if (!this->handleFileRead("/login.html", request))
 			{
-				request->send(404, "text/plain", "FileNotFound");
+				request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 			}
 		}
 	});
 
 	// /login
-	on("/login", HTTP_POST, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_LOGIN, HTTP_POST, [this](AsyncWebServerRequest* request) {
 		if (this->isLoggedin(request))
 		{
 			AsyncWebServerResponse* response = request->beginResponse(301);
-			response->addHeader("Location", "/dashboard");
+			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			request->send(response);
+			// delete response; // Free up memory!
 		}
 		else
 		{
@@ -336,7 +357,7 @@ void WEBServer::initRouts() {
 #pragma region Logout page API
 
 	// /logout
-	on("/logout", HTTP_GET, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_LOGOUT, HTTP_GET, [this](AsyncWebServerRequest* request) {
 		if (this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -344,7 +365,7 @@ void WEBServer::initRouts() {
 	});
 
 	// /logout
-	on("/logout", HTTP_POST, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_LOGOUT, HTTP_POST, [this](AsyncWebServerRequest* request) {
 		if (this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -356,7 +377,7 @@ void WEBServer::initRouts() {
 #pragma region Dashboard page API
 
 	// /dashboard
-	on("/dashboard", HTTP_GET, [this](AsyncWebServerRequest *request) {
+	on(ROUT_PAGE_DASHBOARD, HTTP_GET, [this](AsyncWebServerRequest *request) {
 
 		if (!this->isLoggedin(request))
 		{
@@ -366,14 +387,14 @@ void WEBServer::initRouts() {
 
 		if (!this->handleFileRead("/dashboard.html", request))
 		{
-			request->send(404, "text/plain", "FileNotFound");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
 
 		clearAliveTime();
 	});
 
 	// /dashboard
-	on("/dashboard", HTTP_POST, [this](AsyncWebServerRequest *request) {
+	on(ROUT_PAGE_DASHBOARD, HTTP_POST, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -388,7 +409,7 @@ void WEBServer::initRouts() {
 #pragma region Settings page API
 
 	// /settings
-	on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {
+	on(ROUT_PAGE_SETTINGS, HTTP_GET, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -396,14 +417,14 @@ void WEBServer::initRouts() {
 		}
 		if (!this->handleFileRead("/settings.html", request))
 		{
-			request->send(404, "text/plain", "FileNotFound");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
 
 		clearAliveTime();
 	});
 
 	// /settings
-	on("/settings", HTTP_POST, [this](AsyncWebServerRequest *request) {
+	on(ROUT_PAGE_SETTINGS, HTTP_POST, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -420,7 +441,7 @@ void WEBServer::initRouts() {
 #pragma region Network page API
 
 	// /network
-	on("/network", HTTP_GET, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_NETWORK, HTTP_GET, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -429,14 +450,14 @@ void WEBServer::initRouts() {
 
 		if (!this->handleFileRead("/network.html", request))
 		{
-			request->send(404, "text/plain", "FileNotFound");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
 
 		clearAliveTime();
 	});
 
 	// /network
-	on("/network", HTTP_POST, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_NETWORK, HTTP_POST, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -453,7 +474,7 @@ void WEBServer::initRouts() {
 #pragma region MQTT page API
 
 	// /mqtt
-	on("/mqtt", HTTP_GET, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_MQTT, HTTP_GET, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -462,14 +483,14 @@ void WEBServer::initRouts() {
 
 		if (!this->handleFileRead("/mqtt.html", request))
 		{
-			request->send(404, "text/plain", "FileNotFound");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
 
 		clearAliveTime();
 	});
 
 	// /mqtt
-	on("/mqtt", HTTP_POST, [this](AsyncWebServerRequest* request) {
+	on(ROUT_PAGE_MQTT, HTTP_POST, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -486,14 +507,14 @@ void WEBServer::initRouts() {
 #pragma region Parameters API
 
 	// Identifier device name.
-	on("/api/v1/identify", [this](AsyncWebServerRequest* request) {
+	on(ROUT_API_ID, [this](AsyncWebServerRequest* request) {
 			String values = "";
 			values += (String)DeviceConfiguration.DeviceName;
-			request->send(200, "text/plain", values);
+			request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 		});
 
 	// General values: name, version
-	on("/api/v1/generalcfg", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_GEN_CONFIG, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -506,7 +527,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Network values: IP, GW, DNS, MASK, ... .
-	on("/api/v1/netcfg", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_NET_CONFIG, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -519,7 +540,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Connection state values: connection state.
-	on("/api/v1/connstate", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_CONN_STATE, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -532,7 +553,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Information values: SSID, IP, GW, DNS, Mask, MAC, ... .
-	on("/api/v1/conninfo", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_CONN_INFO, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -545,7 +566,7 @@ void WEBServer::initRouts() {
 	});
 
 	// Scans WiFi networks.
-	on("/api/v1/scan", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_NET_SCAN, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -558,7 +579,7 @@ void WEBServer::initRouts() {
 	});
 	
 	// HTTP authentication.
-	on("/api/v1/auth", [this](AsyncWebServerRequest *request) {
+	on(ROUT_API_AUTH, [this](AsyncWebServerRequest *request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -571,7 +592,7 @@ void WEBServer::initRouts() {
 	});
 
 	// MQTT params.
-	on("/api/v1/mqtt", [this](AsyncWebServerRequest* request) {
+	on(ROUT_API_MQTT, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
@@ -584,62 +605,62 @@ void WEBServer::initRouts() {
 	});
 
 	// Stop device.
-	on("/api/v1/device/stop", [this](AsyncWebServerRequest* request) {
+	on(ROUT_API_DEVICE_STOP, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
 			return;
 		}
 
-		if (callbackStopDevice != nullptr)
+		if (m_callbackStopDevice != nullptr)
 		{
-			callbackStopDevice();
+			m_callbackStopDevice();
 		}
 
-		request->send(200, "text/plain", "");
+		request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 
 		clearAliveTime();
 	});
 
 	// Start device.
-	on("/api/v1/device/start", [this](AsyncWebServerRequest* request) {
+	on(ROUT_API_DEVICE_START, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
 			return;
 		}
 
-		if (callbackStartDevice != nullptr)
+		if (m_callbackStartDevice != nullptr)
 		{
-			callbackStartDevice();
+			m_callbackStartDevice();
 		}
 
-		request->send(200, "text/plain", "");
+		request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 
 		clearAliveTime();
 	});
 
 	// Reboot the controller.
-	on("/api/v1/reboot", [this](AsyncWebServerRequest* request) {
+	on(ROUT_API_REBOOT, [this](AsyncWebServerRequest* request) {
 		if (!this->isLoggedin(request))
 		{
 			this->goToLogin(request);
 			return;
 		}
 
-		if (callbackReboot != nullptr)
+		if (m_callbackReboot != nullptr)
 		{
-			callbackReboot();
+			m_callbackReboot();
 		}
 
-		request->send(200, "text/plain", "");
+		request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 	});
 
 #pragma endregion
 
 #pragma region HTTP Uploader API
 
-	on("/api/v1/upload", HTTP_POST,
+	on(ROUT_API_UPLOAD, HTTP_POST,
 		[](AsyncWebServerRequest* request)
 		{
 			if (!request->authenticate(DeviceConfiguration.Username.c_str(), DeviceConfiguration.Password.c_str()))
@@ -647,7 +668,7 @@ void WEBServer::initRouts() {
 				request->requestAuthentication();
 			}
 
-			request->send(200, "text/plain", "");
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 		},
 		[this](AsyncWebServerRequest* request, String filename, size_t index, uint8* data, size_t len, bool final)
 		{
@@ -658,6 +679,7 @@ void WEBServer::initRouts() {
 
 			this->handleFileUpload(request, filename, index, data, len, final);
 	});
+
 #pragma endregion
 
 #pragma region Page not found API
@@ -668,12 +690,11 @@ void WEBServer::initRouts() {
 		DEBUGLOG("Not found: %s\r\n", request->url().c_str());
 		AsyncWebServerResponse *response = request->beginResponse(200);
 		response->addHeader("Connection", "close");
-		response->addHeader("Access-Control-Allow-Origin", "*");
 		if (!this->handleFileRead(request->url(), request))
 		{
-			request->send(404, "text/plain", "FileNotFound");
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
-		delete response; // Free up memory!
+		// delete response; // Free up memory!
 	});
 
 #pragma endregion
@@ -710,10 +731,10 @@ void WEBServer::initRouts() {
 			return;
 		}
 
-		AsyncWebServerResponse *response = request->beginResponse(403, "text/plain", "Forbidden");
+		AsyncWebServerResponse *response = request->beginResponse(403, MIME_TYPE_PLAIN_TEXT, "Forbidden");
 		response->addHeader("Connection", "close");
-		response->addHeader("Access-Control-Allow-Origin", "*");
 		request->send(response);
+		// delete response; // Free up memory!
 	});
 
 	on(CONFIG_NET, HTTP_GET, [this](AsyncWebServerRequest *request) {
@@ -723,10 +744,10 @@ void WEBServer::initRouts() {
 			return;
 		}
 
-		AsyncWebServerResponse *response = request->beginResponse(403, "text/plain", "Forbidden");
+		AsyncWebServerResponse *response = request->beginResponse(403, MIME_TYPE_PLAIN_TEXT, "Forbidden");
 		response->addHeader("Connection", "close");
-		response->addHeader("Access-Control-Allow-Origin", "*");
 		request->send(response);
+		// delete response; // Free up memory!
 	});
 
 	on(CONFIG_MQTT, HTTP_GET, [this](AsyncWebServerRequest *request) {
@@ -736,10 +757,10 @@ void WEBServer::initRouts() {
 			return;
 		}
 
-		AsyncWebServerResponse *response = request->beginResponse(403, "text/plain", "Forbidden");
+		AsyncWebServerResponse *response = request->beginResponse(403, MIME_TYPE_PLAIN_TEXT, "Forbidden");
 		response->addHeader("Connection", "close");
-		response->addHeader("Access-Control-Allow-Origin", "*");
 		request->send(response);
+		// delete response; // Free up memory!
 	});
 
 #endif // SHOW_CONFIG
@@ -771,7 +792,7 @@ void WEBServer::handleFileList(AsyncWebServerRequest *request) {
 
 	if (!request->hasArg("dir"))
 	{
-		request->send(500, "text/plain", "BAD ARGS");
+		request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD ARGS");
 		return;
 	}
 
@@ -858,6 +879,7 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest *request) {
 
 		DEBUGLOG("File %s EXIST\r\n", path.c_str());
 		request->send(response);
+		// delete response; // Free up memory!
 		DEBUGLOG("File %s SENT\r\n", path.c_str());
 
 		return true;
@@ -886,19 +908,19 @@ void WEBServer::handleFileCreate(AsyncWebServerRequest *request) {
 
 	if (request->args() == 0)
 	{
-		return request->send(500, "text/plain", "BAD ARGS");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD ARGS");
 	}
 
 	String path = request->arg(0U);
 	DEBUGLOG("handleFileCreate: %s\r\n", path.c_str());
 	if (path == "/")
 	{
-		return request->send(500, "text/plain", "BAD PATH");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD PATH");
 	}
 
 	if (m_fileSystem->exists(path))
 	{
-		return request->send(500, "text/plain", "FILE EXISTS");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "FILE EXISTS");
 	}
 
 	File file = m_fileSystem->open(path, "w");
@@ -908,10 +930,10 @@ void WEBServer::handleFileCreate(AsyncWebServerRequest *request) {
 	}
 	else
 	{
-		return request->send(500, "text/plain", "CREATE FAILED");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "CREATE FAILED");
 	}
 
-	request->send(200, "text/plain", "");
+	request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 	path = String(); // Remove? Useless statement?
 }
 
@@ -934,23 +956,23 @@ void WEBServer::handleFileDelete(AsyncWebServerRequest *request) {
 
 	if (request->args() == 0)
 	{
-		return request->send(500, "text/plain", "BAD ARGS");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD ARGS");
 	}
 
 	String path = request->arg(0U);
 	DEBUGLOG("handleFileDelete: %s\r\n", path.c_str());
 	if (path == "/")
 	{
-		return request->send(500, "text/plain", "BAD PATH");
+		return request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD PATH");
 	}
 
 	if (!m_fileSystem->exists(path))
 	{
-		return request->send(404, "text/plain", "FileNotFound");
+		return request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 	}
 
 	m_fileSystem->remove(path);
-	request->send(200, "text/plain", "");
+	request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 	path = String(); // Remove? Useless statement?
 }
 
@@ -1061,17 +1083,18 @@ void WEBServer::pageSendLogin(AsyncWebServerRequest* request) {
 		if (DeviceConfiguration.Username == user && DeviceConfiguration.Password == pass)
 		{
 			AsyncWebServerResponse* response = request->beginResponse(301);
-			response->addHeader("Location", "/dashboard");
+			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			response->addHeader("Set-Cookie", m_Cookie);
 			request->send(response);
+			// delete response; // Free up memory!
 			return;
 		}
 	}
 
 	if (!this->handleFileRead("/login.html", request))
 	{
-		request->send(404, "text/plain", "FileNotFound");
+		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
 }
@@ -1158,7 +1181,7 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 	if (!this->handleFileRead("/settings.html", request))
 	{
-		request->send(404, "text/plain", "FileNotFound");
+		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
 }
@@ -1318,7 +1341,7 @@ void WEBServer::pageSendNetwork(AsyncWebServerRequest* request) {
 
 	if (!this->handleFileRead("/network.html", request))
 	{
-		request->send(404, "text/plain", "FileNotFound");
+		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
 }
@@ -1387,7 +1410,7 @@ void WEBServer::pageSendMqtt(AsyncWebServerRequest* request) {
 
 	if (!this->handleFileRead("/mqtt.html", request))
 	{
-		request->send(404, "text/plain", "FileNotFound");
+		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
 }
@@ -1411,7 +1434,7 @@ void WEBServer::apiSendGeneralConfig(AsyncWebServerRequest* request) {
 	values += "ntp-tz|" + String(DeviceConfiguration.NTPTimezone) + "|select\n";
 	values += "acativation-code|" + String(DeviceConfiguration.ActivationCode) + "|input\n";
 
-	request->send(200, "text/plain", values);
+	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 }
 
 /** @brief Send network configuration values. Part of the API.
@@ -1446,7 +1469,7 @@ void WEBServer::apiSendNetConfig(AsyncWebServerRequest* request) {
 	values += "dns_3|" + (String)NetworkConfiguration.DNS[3] + "|input\n";
 	values += "dhcp|" + (String)(NetworkConfiguration.DHCP ? "checked" : "") + "|chk\n";
 
-	request->send(200, "text/plain", values);
+	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 	values = "";
 }
 
@@ -1454,7 +1477,7 @@ void WEBServer::apiSendNetConfig(AsyncWebServerRequest* request) {
  *  @param request, AsyncWebServerRequest request object.
  *  @return Void.
  */
-void WEBServer::apiSendConnState(AsyncWebServerRequest *request) {
+void WEBServer::apiSendConnState(AsyncWebServerRequest* request) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
@@ -1476,7 +1499,7 @@ void WEBServer::apiSendConnState(AsyncWebServerRequest *request) {
 	String values = "";
 	values += "connectionstate|" + state + "|div\n";
 	//values += "networks|Scanning networks ...|div\n";
-	request->send(200, "text/plain", values);
+	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 	state = "";
 	values = "";
 	Networks = "";
@@ -1576,7 +1599,7 @@ void WEBServer::apiSendAuthCfg(AsyncWebServerRequest *request) {
 	values += "user|" + (String)DeviceConfiguration.Username + "|input\n";
 	// values += "password|" + (String)DeviceConfiguration.Password + "|input\n";
 
-	request->send(200, "text/plain", values);
+	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 }
 
 /** @brief Send MQTT configuration values. Part of the API.
@@ -1597,7 +1620,7 @@ void WEBServer::apiSendMqttCfg(AsyncWebServerRequest* request) {
 	values += "domain|" + (String)MqttConfiguration.Domain + "|input\n";
 	values += "port|" + (String)MqttConfiguration.Port + "|input\n";
 
-	request->send(200, "text/plain", values);
+	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 }
 
 /** @brief Check the authorization status.
@@ -1626,7 +1649,7 @@ bool WEBServer::isLoggedin(AsyncWebServerRequest *request) {
  */
 void WEBServer::goToLogin(AsyncWebServerRequest* request) {
 	AsyncWebServerResponse* response = request->beginResponse(301);
-	response->addHeader("Location", "/login");
+	response->addHeader("Location", ROUT_PAGE_LOGIN);
 	response->addHeader("Cache-Control", "no-cache");
 	response->addHeader("Set-Cookie", "");
 	m_Cookie = genSession();
@@ -1645,7 +1668,7 @@ void WEBServer::clearAliveTime()
  *  @param arg, void Execution arguments.
  *  @return Void.
  */
-void WEBServer::s_secondTick(void* arg) {
+void WEBServer::eventUpdateHandler(void* arg) {
 	// Get instance.
 	WEBServer* self = reinterpret_cast<WEBServer*>(arg);
 
@@ -1683,7 +1706,7 @@ String WEBServer::getContentType(String filename, AsyncWebServerRequest *request
 	else if (filename.endsWith(".pdf")) return "application/x-pdf";
 	else if (filename.endsWith(".zip")) return "application/x-zip";
 	else if (filename.endsWith(".gz")) return "application/x-gzip";
-	return "text/plain";
+	return MIME_TYPE_PLAIN_TEXT;
 }
 
 /** @brief Generate cookie.

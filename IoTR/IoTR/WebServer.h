@@ -1,6 +1,6 @@
 /*
 
-Robo Monitor - Robot Monitoring Device System
+IoTR - Robot Monitoring Device System
 
 Copyright (C) [2020] [Orlin Dimitrov] GPLv3
 
@@ -29,6 +29,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #else
 	#include "WProgram.h"
 #endif
+
+#pragma region Definitions
+
+#define ESS_IR_CMD "irCommand"
+#define ESS_DEV_STATE "deviceState"
+#define ESS_DEV_STATUS "deviceStatus"
+
+#define ROUT_EDITOR "/edit"
+#define ROUT_EDITOR_LIST "/list"
+
+#define ROUT_PAGE_HOME "/"
+#define ROUT_PAGE_LOGIN "/login"
+#define ROUT_PAGE_DASHBOARD "/dashboard"
+#define ROUT_PAGE_SETTINGS "/settings"
+#define ROUT_PAGE_NETWORK "/network"
+#define ROUT_PAGE_MQTT "/mqtt"
+#define ROUT_PAGE_LOGOUT "/logout"
+
+#define ROUT_API_ID "/api/v1/identify"
+#define ROUT_API_GEN_CONFIG "/api/v1/generalcfg"
+#define ROUT_API_NET_CONFIG "/api/v1/netcfg"
+#define ROUT_API_CONN_STATE "/api/v1/connstate"
+#define ROUT_API_CONN_INFO "/api/v1/conninfo"
+#define ROUT_API_NET_SCAN "/api/v1/scan"
+#define ROUT_API_AUTH "/api/v1/auth"
+#define ROUT_API_MQTT "/api/v1/mqtt"
+#define ROUT_API_DEVICE_STOP "/api/v1/device/stop"
+#define ROUT_API_DEVICE_START "/api/v1/device/start"
+#define ROUT_API_REBOOT "/api/v1/reboot"
+#define ROUT_API_UPLOAD "/api/v1/upload"
+
+#define MIME_TYPE_PLAIN_TEXT "text/plain"
+
+#pragma endregion
+
+
 
 #pragma region Headers
 
@@ -86,7 +122,12 @@ public:
 	 *  @return Void.
 	 */
 	void update();
-		
+	
+	/** @brief Updates the header data.
+	 *  @return Void.
+	 */
+	void sendDeviceStatus(String data);
+
 	void displayIRCommand(uint32_t command);
 
 	void displayLog(String line);
@@ -96,20 +137,22 @@ public:
 	 */
 	void sendDeviceState(String device_state);
 
+
+
 	/** @brief Set start process function. Part of the API.
-	 *  @param callback, Start functio.
+	 *  @param callback, Start function.
 	 *  @return Void.
 	 */
 	void setCbStartDevice(void(*callback)(void));
 
 	/** @brief Set stop process function. Part of the API.
-	 *  @param callback, Stop functio.
+	 *  @param callback, Stop function.
 	 *  @return Void.
 	 */
 	void setCbStopDevice(void(*callback)(void));
 
 	/** @brief Set reboot process function. Part of the API.
-	 *  @param callback, Stop functio.
+	 *  @param callback, Reboot function.
 	 *  @return Void.
 	 */
 	void setCbReboot(void(*callback)(void));
@@ -134,13 +177,16 @@ protected:
 	unsigned int m_keepAliveTime = 0;
 
 	/** @brief Callback function. */
-	void(*callbackStartDevice)(void);
+	void(*m_callbackStartDevice)(void);
 
 	/** @brief Callback function. */
-	void(*callbackStopDevice)(void);
+	void(*m_callbackStopDevice)(void);
 
 	/** @brief Callback function. */
-	void(*callbackReboot)(void);
+	void(*m_callbackReboot)(void);
+
+	/** @brief Callback function. */
+	String(*m_callbackUpdateHeaderData)(void);
 
 #pragma endregion
 
@@ -285,7 +331,7 @@ protected:
 	 *  @param arg, void Execution arguments.
 	 *  @return Void.
 	 */
-	static void s_secondTick(void* arg);
+	static void eventUpdateHandler(void* arg);
 
 	/** @brief Generate cookie.
 	 *  @return String, SHA1 cookie.
