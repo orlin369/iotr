@@ -36,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEVICE_BRAND "IoTR"
 
 // NOTE: Be careful with the Version number in the server and here in the source code.
-// TODO: Version Controll - Coment this version notation with the team.
 // 1000
 // 10 - Major
 // 00 - Minor
