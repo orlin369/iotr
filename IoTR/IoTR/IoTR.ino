@@ -635,7 +635,7 @@ void configure_command_module() {
 #endif // SHOW_FUNC_NAMES
 
 #ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.init(PIN_LED2, PIN_LED3);
+	CommandModule.init(PIN_KILL_SW, PIN_SW_ENABLE);
 	CommandModule.setState(StateType::Restart);
 #endif // ENABLE_DEVICE_CONTROL
 }
@@ -830,6 +830,7 @@ void loop()
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
 			DeviceStatus.Flags = 0;
 			// TODO: Flags
+			// part of the flags. - MQTTClient_g.connected();
 
 			if (MQTTClient_g.connected())
 			{

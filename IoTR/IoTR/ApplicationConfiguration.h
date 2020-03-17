@@ -204,6 +204,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma endregion
 
+#pragma region Command Module
+
+#ifdef ENABLE_DEVICE_CONTROL
+#define PIN_KILL_SW D0
+#define PIN_SW_ENABLE D1
+#endif // ENABLE_DEVICE_CONTROL
+
+#pragma endregion
+
+
 #pragma region Status LED Configuration
 
 #ifdef ENABLE_STATUS_LED
