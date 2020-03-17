@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "CommandModule.h"
 
-void CommandModuleClass::init(uint8_t pin_start, uint8_t pin_kill) {
+void CommandModuleClass::init(uint8_t pin_kill, uint8_t pin_start) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);

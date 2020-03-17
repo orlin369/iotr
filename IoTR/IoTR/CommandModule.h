@@ -55,7 +55,7 @@ class CommandModuleClass
 	 void stop();
 
  public:
-	void init(uint8_t pin_start, uint8_t pin_kill);
+	void init(uint8_t pin_kill, uint8_t pin_start);
 	void setState(int state);
 	int getState();
 	void update();
