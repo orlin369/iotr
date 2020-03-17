@@ -508,10 +508,10 @@ void WEBServer::initRouts() {
 
 	// Identifier device name.
 	on(ROUT_API_ID, [this](AsyncWebServerRequest* request) {
-			String values = "";
-			values += (String)DeviceConfiguration.DeviceName;
-			request->send(200, MIME_TYPE_PLAIN_TEXT, values);
-		});
+		String values = "";
+		values += DeviceConfiguration.DeviceName;
+		request->send(200, MIME_TYPE_PLAIN_TEXT, values);
+	});
 
 	// General values: name, version
 	on(ROUT_API_GEN_CONFIG, [this](AsyncWebServerRequest *request) {

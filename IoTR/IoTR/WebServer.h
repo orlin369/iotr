@@ -123,10 +123,12 @@ public:
 	 */
 	void update();
 	
-	/** @brief Updates the header data.
-	 *  @return Void.
-	 */
-	void sendDeviceStatus(String data);
+
+	 /** @brief Updates device status.
+	  *  @param data, String JSON status.
+	  *  @return Void
+	  */
+	void sendDeviceStatus(String status);
 
 	void displayIRCommand(uint32_t command);
 

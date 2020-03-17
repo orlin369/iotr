@@ -60,6 +60,10 @@ function DeviceStatus(url) {
             var voltage = document.getElementById("h-voltage");
             voltage.innerHTML = status["voltage"].toFixed(2) + "V";
 
+            // TODO: Get it from flags.
+            //var mqtt = document.getElementById("h-mqtt");
+            //mqtt.innerHTML = status["mqtt_conn"];
+
         }, false);
     };
 }

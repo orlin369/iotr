@@ -317,6 +317,8 @@
                     <span id="h-rssi">RSSI</span>
                     <span>|</span>
                     <span id="h-voltage">0.0V</span>
+                    <span>|</span>
+                    <span id="h-mqtt">NO</span>
                 </div>
             </div>
         </div>
@@ -527,53 +529,6 @@
                     }, false);
                 }
             }
-            
-            function IRCommands(url, topic, viewElement) {
-
-                var viewElement = viewElement;
-                var topic = topic;
-                var eventSource = new EventSource(url);
-
-                function addMessage(m){
-                    if (viewElement != null)
-                    {
-                        var msg = document.createElement("div");
-                        msg.innerText = m;
-                        document.getElementById(viewElement).appendChild(msg);
-                        // window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);    
-                    }
-                    else
-                    {
-                        console.log(m);
-                    }
-                }
-
-                this.init = function()
-                {
-                    eventSource.onopen = function(e) {
-                        addMessage("IR Opened");
-                        
-                    };
-                    eventSource.onerror = function(e) {
-                        if (e.target.readyState != EventSource.OPEN) {
-                        addMessage("IR Closed");
-                        }
-                    };
-                    eventSource.onmessage = function(e) {
-                        addMessage("Event: " + e.data);
-                    };
-                    eventSource.addEventListener(topic, function(e) {
-                        if (!e.data)
-                        {
-                            return;
-                        }
-                        
-                        // console.log(e.data);
-
-                        addMessage("Event[irCommand]: " + e.data);
-                    }, false);
-                }
-}
 
             function Logger(url, topic, viewElement) {
 
@@ -615,9 +570,6 @@
 
                 var logger = new Logger(url, "log", "dbg");
                 logger.init();
-
-                var irCommands = new IRCommands(url, "irCommand", "dbg");
-                irCommands.init();
 
                 var robot = new iRobot(url);
                 robot.init();
