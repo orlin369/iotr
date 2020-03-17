@@ -3,7 +3,7 @@
 ## Brief
 
 - This project is related to **IoTR - Robot Monitoring Device System**. The content of the repository is tha source code of **ESP8266 (WeMos-R1/2) MCU** on the board.
-- IDE that is used to create this project is **Arduino IDE**, the code is writen in **Visual Studio 2015** with **vMicro** extention to work with **Arduino SDK** and **ESP8266 SDK**.
+- IDE that is used to create this project is **Arduino IDE**, the code is writen in **Visual Studio 2019** with **vMicro** extention to work with **Arduino SDK** and **ESP8266 SDK**.
 - The project is create in **Windows 10** enviremont.
 
 ## Enviremont
@@ -12,18 +12,18 @@
 
 **1. Arduino IDE**
 
-- Link - [here](https://www.arduino.cc/en/Main/Software)
+- Link - [**here**](https://www.arduino.cc/en/Main/Software)
 - Version - 1.8.12 or greater
 
 **2. Visual Studio**
 
-- Link - [here](https://visualstudio.microsoft.com/downloads/)
+- Link - [**here**](https://visualstudio.microsoft.com/downloads/)
 - Version - 2019
 
 **3. vMicro**
 
-- Link - [here](https://www.visualmicro.com/page/User-Guide.aspx?doc=Visual-Micro-Menu.html)
-- Varsion - [here](https://www.visualmicro.com/page/Visual-Micro-Product-Version-History-Fixes-and-Additions.aspx)
+- Link - [**here**](https://www.visualmicro.com/page/User-Guide.aspx?doc=Visual-Micro-Menu.html)
+- Varsion - [**here**](https://www.visualmicro.com/page/Visual-Micro-Product-Version-History-Fixes-and-Additions.aspx)
 
 **4. ESP8266 SDK**
 
@@ -31,6 +31,11 @@
 - Version - 2.6.3
 - Reposytory - [**here**](https://github.com/esp8266/Arduino)
 - License - [**GPL-V2.1**](https://github.com/esp8266/Arduino/blob/master/LICENSE)
+
+**5. Upload files from "/data" to the MCU**
+- Link - Tutorial how to setup file uploader [**here**](https://github.com/esp8266/arduino-esp8266fs-plugin)
+- Version - 0.5.0
+- License - [**GPL-2.0**](https://github.com/esp8266/arduino-esp8266fs-plugin/blob/master/LICENSE.txt)
 
 ## External Libraries
 
