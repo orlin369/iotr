@@ -32,8 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ApplicationConfiguration.h"
 
-#include <ArduinoJson.h>
-
 typedef struct {
 	bool Wall = false; ///< Wall sensor.
 	bool CliffLeft = false; ///< Password - WWW password. Set default value.

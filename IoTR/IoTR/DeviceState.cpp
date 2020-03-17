@@ -36,21 +36,17 @@ String dev_state_to_json() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 */
+	String json = "";
+	json += "{";
+	json += "\"Wall\":" + String(DeviceState.Wall);
+	json += ",\"CliffLeft\":" + String(DeviceState.CliffLeft);
+	json += ",\"CliffFrontLeft\":" + String(DeviceState.CliffFrontLeft);
+	json += ",\"CliffFrontRight\":" + String(DeviceState.CliffFrontRight);
+	json += ",\"CliffRight\":" + String(DeviceState.CliffRight);
+	json += ",\"BumpersAndWheelDrops\":" + String(DeviceState.BumpersAndWheelDrops);
+	json += "}";
 
-	//flag_config = false;
-	DynamicJsonDocument doc(512);
+	//DEBUGLOG("%s\r\n", json.c_str());
 
-	doc["Wall"] = DeviceState.Wall;
-	doc["CliffLeft"] = DeviceState.CliffLeft;
-	doc["CliffFrontLeft"] = DeviceState.CliffFrontLeft;
-	doc["CliffFrontRight"] = DeviceState.CliffFrontRight;
-	doc["CliffRight"] = DeviceState.CliffRight;
-	doc["BumpersAndWheelDrops"] = DeviceState.BumpersAndWheelDrops;
-
-	String content = "";
-
-	serializeJson(doc, content);
-	//DEBUGLOG("%s\r\n", content.c_str());
-
-	return content;
+	return json;
 }
