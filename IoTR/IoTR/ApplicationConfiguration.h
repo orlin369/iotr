@@ -30,34 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
-#define NODEMCU1
-
-#ifdef NODEMCU1
-
-#define PIN_LED1 D3  // D3 - NodeMCU
-#define PIN_LED2 D2 // D2 - NodeMCU
-#define PIN_LED3 D1  // D1 - NodeMCU
-#define PIN_LED4 D0  // D0 - NodeMCU
-
-#define PIN_BTN1 D5 // D5 - NodeMCU
-#define PIN_BTN2 D6 // D6 - NodeMCU
-#define PIN_BTN3 D7 // D7 - NodeMCU
-#define PIN_BTN4 D4  // D4 - NodeMCU
-
-#else
-
-#define PIN_LED1 0  // D3 - NodeMCU
-#define PIN_LED2 4 // D2 - NodeMCU
-#define PIN_LED3 5  // D1 - NodeMCU
-#define PIN_LED4 20  // D0 - NodeMCU
-
-#define PIN_BTN1 16 // D5 - NodeMCU
-#define PIN_BTN2 12 // D6 - NodeMCU
-#define PIN_BTN3 13 // D7 - NodeMCU
-#define PIN_BTN4 4  // D4 - NodeMCU
-
-#endif // NODEMCU1
-
 #pragma region General Configuration
 
 /** @brief Brand name. */
@@ -72,9 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ESP_FW_VERSION 1
 
 #define HEARTBEAT_TIME 5000
-
-/** @brief Switch the logging terminal. */
-#define DEBUGLOG SERIALLOG
 
 /** @brief Show functions names. */
 #define SHOW_FUNC_NAMES
@@ -99,6 +68,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** @brief Enable software ON and OFF. */
 #define EANBLE_SOFTWARE_ONOFF
+
+#define WS_MAX_QUEUED_MESSAGES 12
 
 #pragma endregion
 
@@ -125,11 +96,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Debug Terminal Configuration
 
+/** @brief Switch the logging terminal. */
+#define DEBUGLOG SERIALLOG
+
 /** @brief Debug output port. */
 #define DBG_OUTPUT_PORT Serial1 // Serial1 // on D4
 
 /** @brief Debug output port baud rate. */
 #define DBG_OUTPUT_PORT_BAUDRATE 115200
+
+#ifndef DEBUGLOG
+#define DEBUGLOG(...)
+#endif // !DEBUGLOG
 
 #pragma endregion
 
@@ -159,10 +137,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TIMEOUT_TO_CONNECT 10
 
 /** @brief Default STA SSID. */
-#define DEFAULT_STA_SSID "YOUR_DEFAULT_WIFI_PASSWD"
+#define DEFAULT_STA_SSID "YOUR_DEFAULT_WIFI_SSID"
 
 /** @brief Default STA password. */
-#define DEFAULT_STA_PASSWORD "YOUR_DEFAULT_WIFI_SSID"
+#define DEFAULT_STA_PASSWORD "YOUR_DEFAULT_WIFI_PASS"
 
 /** @brief Default enabled DHCP client. */
 #define DEFAULT_ENABLED_DHCP 1
@@ -232,8 +210,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef ENABLE_STATUS_LED
 
 /** @brief Status LED pin */
-#define PIN_RGB_LED 15 // D8 - NodeMCU
-
+#define PIN_RGB_LED D8
 #endif // ENABLE_STATUS_LED
 
 #pragma endregion
@@ -245,9 +222,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif // EANBLE_SOFTWARE_ONOFF
 
 #pragma endregion
-
-#ifndef DEBUGLOG
-#define DEBUGLOG(...)
-#endif // !DEBUGLOG
 
 #endif // _APPLICATIONCONFIGURATION_h
