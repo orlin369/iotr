@@ -35,21 +35,17 @@ void check_update_ESP() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	uint8 c_MACL[WL_MAC_ADDR_LENGTH];
-	WiFi.macAddress(c_MACL);
-	String MACL = mac2str(c_MACL);
+	HTTPClient HttpClientL;
+	int StatusCodeL;
 
+	String MACL = WiFi.macAddress();
 	String BinariImageUrlL = String(UPDATE_SERVER_DOMAIN) + String(UPDATE_SERVER_PATH_ESP);
 	String FwVersUrlL = String(UPDATE_SERVER_DOMAIN) + String(VERSION_SERVER_PATH_ESP);
 
 	DEBUGLOG("Checking for firmware updates.\r\n");
 	DEBUGLOG("MAC address: %s\r\n", MACL.c_str());
 	DEBUGLOG("Firmware version URL: %s\r\n", FwVersUrlL.c_str());
-
-	HTTPClient HttpClientL;
-
-	int StatusCodeL;
-
+	
 	HttpClientL.begin(FwVersUrlL);
 	StatusCodeL = HttpClientL.GET();
 
@@ -86,7 +82,8 @@ void check_update_ESP() {
 			DEBUGLOG("Already on latest version.\r\n");
 		}
 	}
-	else {
+	else
+	{
 		DEBUGLOG("Firmware version check failed, got HTTP response code %d\r\n", StatusCodeL);
 	}
 

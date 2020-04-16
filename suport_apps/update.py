@@ -145,45 +145,12 @@ def on_connect(mosq, obj, flags, rc):
     global __logger, __mqttc
 
     __logger.info("Connected with RC: {}".format(str(rc)))
-    __mqttc.subscribe("test/device/state", 0)
-    __mqttc.subscribe("test/device/out", 0)
-    # Test
-    __mqttc.subscribe("SYS/broker/clients/connected", 0)
-    __mqttc.subscribe("SYS/broker/clients/disconnected", 0)
+    __mqttc.publish("test/device/update", 1)
 
 def on_error(mosq, obj):
     global __logger, __mqttc
 
     __logger.info("What is going on????")
-
-def on_message(mosq, obj, msg):
-
-    global __logger
-
-    message = msg.payload.decode("utf-8")
-    __logger.info("Topic: " + str(msg.topic))
-    __logger.info("QoS: " + str(msg.qos))
-    __logger.info("Payload: {}".format(message))
-
-    if msg.topic == "test/device/state":
-        jmsg = json.loads(message)
-
-        print(jmsg)
-        dt_object = datetime.fromtimestamp(jmsg["ts"])
-        print(dt_object)
-        # ts = msg.payload
-        # ts = ts.decode("utf-8")
-        # ts = int(ts)
-        # dt_object = datetime.fromtimestamp(ts)
-        # print(dt_object)
-    if msg.topic == "test/device/out":
-        pass
-
-def on_subscribe(mosq, obj, mid, granted_qos):
-
-    global __logger, __mqttc
-
-    __logger.info("Subscribed to Topic: {} with QoS: {}".format("IoTR", str(granted_qos)))
 
 #endregion
 
@@ -248,9 +215,7 @@ def main():
     __mqttc = mqtt.Client(client_id="test-id")
 
     # Assign event callbacks
-    __mqttc.on_message = on_message
     __mqttc.on_connect = on_connect
-    __mqttc.on_subscribe = on_subscribe
     __mqttc.on_disconnect = on_error
 
     # Set credentials.

@@ -1515,10 +1515,8 @@ void WEBServer::apiSendConnInfo(AsyncWebServerRequest *request) {
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
-
-	uint8 c_MACL[WL_MAC_ADDR_LENGTH];
-	WiFi.macAddress(c_MACL);
-	String MACL = mac2str(c_MACL);
+	
+	String MACL = WiFi.macAddress();
 	
 	String values = "";
 	

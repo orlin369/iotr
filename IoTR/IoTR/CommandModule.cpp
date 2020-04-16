@@ -42,11 +42,13 @@ void CommandModuleClass::init(uint8_t pin_kill, uint8_t pin_start) {
 }
 
 void CommandModuleClass::restart() {
+/*
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
+*/
 
 	digitalWrite(m_pinStart, HIGH);
 	digitalWrite(m_pinKill, LOW);

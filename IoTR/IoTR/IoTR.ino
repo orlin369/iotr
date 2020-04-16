@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef ESP32
 #include <WiFi.h>
 #endif // ESP32
+
 #include <WiFiClient.h>
 #include <FS.h>
 
@@ -166,10 +167,7 @@ void show_device_properties() {
 	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
 	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
 	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	uint8 c_MACL[WL_MAC_ADDR_LENGTH];
-	WiFi.macAddress(c_MACL);
-	String MACL = mac2str(c_MACL);
-	DEBUGLOG("MAC address: %s\r\n", MACL.c_str());
+	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
 	DEBUGLOG("\r\n");
 }
 
@@ -473,11 +471,11 @@ void onMqttConnect(bool sessionPresent) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	//DEBUGLOG("Connected to MQTT.\r\n");
-	//DEBUGLOG("Session present: %d\r\n", sessionPresent);
+	DEBUGLOG("Connected to MQTT.\r\n");
+	DEBUGLOG("Session present: %d\r\n", sessionPresent);
 
-	//uint16_t packetIdSub = MQTTClient_g.subscribe("test/A0", 2);
-	//DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub);
+	uint16_t packetIdSub = MQTTClient_g.subscribe("test/device/update", 2);
+	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub);
 
 	//uint16_t packetIdSub2 = MQTTClient_g.subscribe("test/TIME", 2);
 	//DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub2);
@@ -542,8 +540,22 @@ void onMqttMessage(
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+	String tp = String(topic);
+	if (tp == "test/device/update")
+	{
+		if ((uint8_t)payload[0] != (uint8_t)ESP_FW_VERSION)
+		{
+			DEBUGLOG("Time to update.\r\n");
+			check_update_ESP();
+		}
+		else
+		{
+			DEBUGLOG("No need to update.\r\n");
+		}
+	}
+
 	DEBUGLOG("Publish received.\r\n");
-	DEBUGLOG("  topic: %d\r\n", topic);
+	DEBUGLOG("  topic: %s\r\n", topic);
 	DEBUGLOG("  qos: %d\r\n", properties.qos);
 	DEBUGLOG("  dup: %d\r\n", properties.dup);
 	DEBUGLOG("  retain: %d\r\n", properties.retain);
@@ -697,13 +709,84 @@ void read_device_statue()
 
 #pragma endregion
 
+#ifdef ENABLE_ROOMBA
+
+void wakeUp(void) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	int ddPin = D1;
+	pinMode(ddPin, OUTPUT);
+	digitalWrite(ddPin, HIGH);
+	delay(100);
+	digitalWrite(ddPin, LOW);
+	delay(500);
+	digitalWrite(ddPin, HIGH);
+	delay(2000);
+}
+
+void startSafe() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	Serial.write(128);  //Start
+	Serial.write(131);  //Safe mode
+	delay(1000);
+}
+
+void drive(int velocity, int radius) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	clamp(velocity, -500, 500); //def max and min velocity in mm/s
+	clamp(radius, -2000, 2000); //def max and min radius in mm
+
+	Serial.write(137);
+	Serial.write(velocity >> 8);
+	Serial.write(velocity);
+	Serial.write(radius >> 8);
+	Serial.write(radius);
+}
+
+void turnCW(unsigned short velocity, unsigned short degrees) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	drive(velocity, -1);
+	clamp(velocity, 0, 500);
+	delay(6600);
+	drive(0, 0);
+}
+#endif // ENABLE_ROOMBA
+
 void setup()
 {
 	// Setup debug port module.
 	setup_debug_port();
 
+	Serial.begin(DeviceConfiguration.PortBaudrate);
+
+#ifdef ENABLE_ROOMBA
+	wakeUp();
+	startSafe();
+	turnCW(40, 180);
+#endif // ENABLE_ROOMBA
+
 	// Turn ON the self power latch.
 	power_on();
+
 
 	// Configure command module.
 	configure_command_module();
@@ -848,23 +931,30 @@ void loop()
 	{
 		LocalWEBServer.displayIRCommand(IRResults_g.command);
 		IRReciver_g.resume();  // Receive the next value
-#ifdef ENABLE_DEVICE_CONTROL
-		if (IRResults_g.command == DeviceConfiguration.ActivationCode)
+		if (IRResults_g.command != 0)
 		{
-			if (CommandModule.getState() == StateType::Start)
+#ifdef ENABLE_DEVICE_CONTROL
+			if (IRResults_g.command == DeviceConfiguration.ActivationCode)
 			{
-				CommandModule.setState(StateType::Stop);
+				if (CommandModule.getState() == StateType::Start)
+				{
+					CommandModule.setState(StateType::Stop);
+				}
+				else if (CommandModule.getState() == StateType::Stop)
+				{
+					CommandModule.setState(StateType::Restart);
+				}
+				else if (CommandModule.getState() == StateType::Restart)
+				{
+					CommandModule.setState(StateType::Start);
+				}
 			}
-			else if (CommandModule.getState() == StateType::Stop)
+			if (MQTTClient_g.connected())
 			{
-				CommandModule.setState(StateType::Restart);
+				MQTTClient_g.publish("test/device/ir", 2, true, String(IRResults_g.command).c_str());
 			}
-			else if (CommandModule.getState() == StateType::Restart)
-			{
-				CommandModule.setState(StateType::Start);
-			}
-		}
 #endif // ENABLE_DEVICE_CONTROL
+		}
 	}
 #endif // ENABLE_IR_INTERFACE
 

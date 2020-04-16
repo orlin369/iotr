@@ -68,6 +68,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Enable software ON and OFF. */
 #define EANBLE_SOFTWARE_ONOFF
 
+//#define ENABLE_ROOMBA
+
 #define WS_MAX_QUEUED_MESSAGES 12
 
 #pragma endregion
@@ -81,7 +83,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEAFULT_PASS "admin"
 
 /** @brief Default device audrate. */
-#define DEVICE_BAUDRATE 115200
+#define DEVICE_BAUDRATE 9600
 
 #define DEFAULT_NTP_DOMAIN "europe.pool.ntp.org"
 
@@ -199,7 +201,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region IR Configuration
 
 #ifdef ENABLE_IR_INTERFACE
-#define PIN_IR_RECV D5
+#define PIN_IR_RECV D7
 #endif // ENABLE_IR_INTERFACE
 
 #pragma endregion
@@ -207,19 +209,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Command Module
 
 #ifdef ENABLE_DEVICE_CONTROL
-#define PIN_KILL_SW D0
-#define PIN_SW_ENABLE D1
+#define PIN_KILL_SW D2
+#define PIN_SW_ENABLE D3
 #endif // ENABLE_DEVICE_CONTROL
 
 #pragma endregion
-
 
 #pragma region Status LED Configuration
 
 #ifdef ENABLE_STATUS_LED
 
 /** @brief Status LED pin */
-#define PIN_RGB_LED D8
+#define PIN_RGB_LED D5
 #endif // ENABLE_STATUS_LED
 
 #pragma endregion
@@ -231,5 +232,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif // EANBLE_SOFTWARE_ONOFF
 
 #pragma endregion
+
+#ifdef ENABLE_ROOMBA
+#define clamp(value, min, max) (value < min ? min : value > max ? max : value)
+/*
+https://hackster.imgix.net/uploads/attachments/669065/screen_shot_2018-11-27_at_9_16_23_am_KEhMKbIVWR.png?auto=compress%2Cformat&w=680&h=510&fit=max
++-----+--------+--------+
+| PIN | Signal | Color  |
++-----+--------+--------+
+|   1 | Vpwr   | Red    |
+|   2 | Vpwr   | Red    |
+|   3 | RXD    | White  |
+|   4 | TXD    | Green  |
+|   5 | BRC    | Yellow |
+|   6 | GND    | Gray   |
+|   7 | GND    | Grey   |
++-----+--------+--------+
+
+*/
+
+#endif // ENABLE_ROOMBA
 
 #endif // _APPLICATIONCONFIGURATION_h
