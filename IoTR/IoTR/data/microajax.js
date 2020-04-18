@@ -52,7 +52,7 @@ function setValues(url)
                 } else if(fields[2] == "chk") {
                     document.getElementById(fields[0]).checked  = fields[1];
                 } else if(fields[2] == "select") {
-                    document.getElementById(fields[0]).innerHTML  = fields[1];
+                    document.getElementById(fields[0]).value  = fields[1];
                 }
             }
         );
