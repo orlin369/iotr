@@ -143,7 +143,7 @@ bool set_default_device_config() {
 	DeviceConfiguration.Password = DEAFULT_PASS;
 	// Device
 	DeviceConfiguration.DeviceName = DEVICE_BRAND;
-	DeviceConfiguration.PortBaudrate = DEVICE_BAUDRATE;
+	DeviceConfiguration.PortBaudrate = DEFAULT_BAUDRATE;
 	// NTP
 	DeviceConfiguration.NTPDomain = DEFAULT_NTP_DOMAIN;
 	DeviceConfiguration.NTPPort = DEFAULT_NTP_PORT;
