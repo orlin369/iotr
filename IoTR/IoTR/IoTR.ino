@@ -25,13 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ApplicationConfiguration.h"
 
 // SDK
-#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
-#endif // ESP8266
-#ifdef ESP32
-#include <WiFi.h>
-#endif // ESP32
 
 #include <WiFiClient.h>
 #include <FS.h>
@@ -65,13 +60,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif // ENABLE_HTTP_OTA
 
 #ifdef ENABLE_IR_INTERFACE
-#ifdef ESP8266
 #include <IRremoteESP8266.h>
 #include <IRrecv.h>
-#endif // ESP8266
-#ifdef ESP32
-#include <IRremote.h>
-#endif // ESP32
 #endif // ENABLE_IR_INTERFACE
 
 #ifdef ENABLE_STATUS_LED
@@ -322,11 +312,11 @@ void configure_to_sta() {
 	// Set the host name.
 	WiFi.hostname(DeviceConfiguration.DeviceName.c_str());
 
-	//disconnect required here
-	//improves reconnect reliability
+	// Disconnect required here,
+	// improves reconnect reliability.
 	WiFi.disconnect();
 
-	// Encourage clean recovery after disconnect species5618, 08-March-2018
+	// Encourage clean recovery after disconnect species5618, 08-March-2018.
 	WiFi.setAutoReconnect(true);
 	WiFi.mode(WIFI_STA);
 
@@ -341,7 +331,7 @@ void configure_to_sta() {
 		WiFi.config(NetworkConfiguration.IP, NetworkConfiguration.Gateway, NetworkConfiguration.NetMask, NetworkConfiguration.DNS);
 	}
 
-	WiFiConnTimer_g.setExpirationTime(TIMEOUT_TO_CONNECT * 1000);
+	WiFiConnTimer_g.setExpirationTime(TIMEOUT_TO_CONNECT * 10001UL);
 	while (WiFi.status() != WL_CONNECTED)
 	{ // Wait for the Wi-Fi to connect
 		//DEBUGLOG("Stat: %d\r\n", WiFi.status());
@@ -631,7 +621,7 @@ void configure_ntp() {
 
 	NTPClient_g.setPoolServerName(DeviceConfiguration.NTPDomain.c_str());
 	NTPClient_g.setTimeOffset(DeviceConfiguration.NTPTimezone);
-	NTPClient_g.setUpdateInterval(NTP_UPDATE_INTERVAL);
+	NTPClient_g.setUpdateInterval(DEFAULT_NTP_UPDATE_INTERVAL);
 	NTPClient_g.begin(DEFAULT_NTP_PORT);
 }
 
@@ -825,7 +815,7 @@ void setup()
 	{
 		configure_to_sta();
 		NTPClient_g.update();
-		HeartbeatTimer_g.setExpirationTime(HEARTBEAT_TIME);
+		HeartbeatTimer_g.setExpirationTime(MQTT_HEARTBEAT_TIME);
 #ifdef ENABLE_STATUS_LED
 		StatusLed.setAnumation(AnimationType::Green);
 #endif // ENABLE_STATUS_LED
