@@ -42,7 +42,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Firmware version string. */
 #define ESP_FW_VERSION 1
 
-#define HEARTBEAT_TIME 5000
 
 /** @brief Show functions names. */
 #define SHOW_FUNC_NAMES
@@ -70,8 +69,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#define ENABLE_ROOMBA
 
-#define WS_MAX_QUEUED_MESSAGES 12
-
 #pragma endregion
 
 #pragma region Device Conguration
@@ -83,15 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEAFULT_PASS "admin"
 
 /** @brief Default device audrate. */
-#define DEVICE_BAUDRATE 9600
-
-#define DEFAULT_NTP_DOMAIN "europe.pool.ntp.org"
-
-#define DEFAULT_NTP_PORT 1337
-
-#define DEFAULT_NTP_TIMEZONE 7200
-
-#define NTP_UPDATE_INTERVAL 60000UL
+#define DEFAULT_BAUDRATE 9600
 
 #pragma endregion
 
@@ -122,6 +111,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** @brief Stay connected time to the WEB server. */
 #define ALIVE_TIME 300 // 300s -> 5min
+
+/** @brief WEB socket maximum queue messages. */
+#define WS_MAX_QUEUED_MESSAGES 12
 
 #pragma endregion
 
@@ -160,28 +152,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma endregion
 
+#pragma region NTP Server
+
+#define DEFAULT_NTP_DOMAIN "europe.pool.ntp.org"
+
+#define DEFAULT_NTP_PORT 1337
+
+#define DEFAULT_NTP_TIMEZONE 7200
+
+#define DEFAULT_NTP_UPDATE_INTERVAL 60000UL
+
+#pragma endregion
+
 #pragma region MQTT Configuration
 
 #define DEFUALT_MQTT_PORT 1883
 #define DEFAULT_MQTT_DOMAIN "broker.mqtt-dashboard.com"
 #define DEFAULT_MQTT_USER ""
 #define DEFAULT_MQTT_PASS ""
-
-/*
-#define ID "7b1309be-6233-11ea-bc55-0242ac130003"
-
-#define STAT_BAT "/api/v1/robots/" + ID + "/status/battery"
-
-7b1309be-6233-11ea-bc55-0242ac130003
-Статус - /robots/{{уникален номер на робота}}/status/{{статус}}
-Команда - /robots/{{уникален номер на робота}}/command/{{команда}}
-
-ПРИМЕР:
-Батерия - /robots/{{уникален номер на робота}}/ status /battery
-Сензор за следене на линия - /robots/{{уникален номер на робота}}/status/ls
-Ляв енкодер - /robots/{{уникален номер на робота}}/status/left/encoder
-Ляв двигател обороти - /robots/{{уникален номер на робота}}/status/left/motor/rpm
-*/
+#define MQTT_HEARTBEAT_TIME 5000UL
 
 #pragma endregion
 
