@@ -27,28 +27,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void FxTimer::update()
 {
+	// Get time.
 	m_now = millis();
 
-	unsigned long PassedTimeL = m_now - m_last_time;
+	// Calculate passed since last time.
+	m_passedTime = m_now - m_lastTime;
 
-	if (PassedTimeL >= m_expiration_time)
+	// Chack passed time, is it grater then allowd.
+	if (m_passedTime >= m_expirationTime)
 	{
 		if (m_expired == false)
 		{
-			m_last_time = m_now;
+			m_lastTime = m_now;
 			m_expired = true;
 		}
 
-		if (callbackExpiration != nullptr)
+		if (m_callbackExpiration != nullptr)
 		{
-			callbackExpiration(millis());
+			m_callbackExpiration(m_now);
 		}
 	}
 }
 
 void FxTimer::updateLastTime()
 {
-	m_last_time = millis();
+	m_lastTime = millis();
 }
 
 void FxTimer::clear()
@@ -63,21 +66,20 @@ void FxTimer::clear()
  *  @param Callback function.
  *  @return Void.
  */
-void FxTimer::setExpirationCb(void(*callback)(unsigned long day))
+void FxTimer::setExpirationCb(void(*callback)(unsigned long now))
 {
-	callbackExpiration = callback;
+	m_callbackExpiration = callback;
 }
 
 void FxTimer::setExpirationTime(unsigned long time)
 {
-	m_expiration_time = time;
+	m_expirationTime = time;
 }
 
 unsigned long FxTimer::getExpirationTime()
 {
-	return m_expiration_time;
+	return m_expirationTime;
 }
-
 
 bool FxTimer::expired()
 {

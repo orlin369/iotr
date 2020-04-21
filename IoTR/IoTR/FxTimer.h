@@ -38,16 +38,19 @@ class FxTimer
 	 bool m_expired = false;
 
 	 /** @brief Expiration time. */
-	 int m_expiration_time = 0;
+	 unsigned long m_expirationTime = 0;
 	 
 	 /** @brief Last time. */
-	 int m_last_time = 0;
+	 unsigned long m_lastTime = 0;
 	 
 	 /** @brief Current time. */
 	 unsigned long m_now = 0;
+
+	 /** @brief Passted time. */
+	 unsigned long m_passedTime = 0;
 	 
 	 /** @brief Callback when expire. */
-	 void(*callbackExpiration)(unsigned long now);
+	 void(*m_callbackExpiration)(unsigned long now);
 
  public:
 
@@ -57,7 +60,7 @@ class FxTimer
 
 	 void clear();
 
-	 void setExpirationCb(void(*callback)(unsigned long day));
+	 void setExpirationCb(void(*callback)(unsigned long now));
 
 	 void setExpirationTime(unsigned long);
 
