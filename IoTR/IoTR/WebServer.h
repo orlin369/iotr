@@ -68,13 +68,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Headers
 
-#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#endif // ESP8266
-#ifdef ESP32
-#include <WiFi.h>
-#endif // ESP32
 #include <WiFiClient.h>
 #include <FS.h>
 

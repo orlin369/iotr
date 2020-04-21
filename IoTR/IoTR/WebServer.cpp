@@ -1177,6 +1177,11 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 		// Save configuration.
 		save_device_config(m_fileSystem, CONFIG_DEVICE);
+
+		// Apply settings to the hardware!
+		Serial.end();
+		Serial.begin(DeviceConfiguration.PortBaudrate);
+		Serial.flush();
 	}
 
 	if (!this->handleFileRead("/settings.html", request))
