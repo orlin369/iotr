@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 // 
 
-#include "MqttConfiguration.h"
+#include "MQTTConfiguration.h"
 
 /* @brief Singelton HTTP Authentication instance. */
 MqttConfiguration_t MqttConfiguration;

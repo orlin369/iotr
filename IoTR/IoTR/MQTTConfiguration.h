@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _MQTTAUTHENTICATIONCONFIGURATION_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
@@ -92,4 +92,3 @@ bool set_default_mqtt_configuration();
 extern MqttConfiguration_t MqttConfiguration;
 
 #endif
-

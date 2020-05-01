@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Headers
 
 /* @brief Smart scale web server. */
-#include "WebServer.h"
+#include "WEBServer.h"
 
 #include <StreamString.h>
 
