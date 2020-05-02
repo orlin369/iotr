@@ -246,7 +246,7 @@ void configure_to_ap() {
 	WiFi.onSoftAPModeStationDisconnected(&handler_ap_mode_station_disconnected);
 
 	// Set the host name.
-	WiFi.hostname(DeviceConfiguration.DeviceName.c_str());
+	WiFi.hostname(NetworkConfiguration.Hostname.c_str());
 
 	// Set the mode.
 	WiFi.mode(WIFI_AP);
@@ -310,7 +310,7 @@ void configure_to_sta() {
 #endif // SHOW_FUNC_NAMES
 
 	// Set the host name.
-	WiFi.hostname(DeviceConfiguration.DeviceName.c_str());
+	WiFi.hostname(NetworkConfiguration.Hostname.c_str());
 
 	// Disconnect required here,
 	// improves reconnect reliability.
@@ -331,7 +331,7 @@ void configure_to_sta() {
 		WiFi.config(NetworkConfiguration.IP, NetworkConfiguration.Gateway, NetworkConfiguration.NetMask, NetworkConfiguration.DNS);
 	}
 
-	WiFiConnTimer_g.setExpirationTime(TIMEOUT_TO_CONNECT * 10001UL);
+	WiFiConnTimer_g.setExpirationTime(TIMEOUT_TO_CONNECT * 1000UL);
 	while (WiFi.status() != WL_CONNECTED)
 	{ // Wait for the Wi-Fi to connect
 		//DEBUGLOG("Stat: %d\r\n", WiFi.status());
@@ -397,7 +397,7 @@ void configure_arduino_ota() {
 	// ArduinoOTA.setPort(8266);
 
 	// Hostname defaults to esp8266-[ChipID]
-	// ArduinoOTA.setHostname("myesp8266");
+	ArduinoOTA.setHostname(NetworkConfiguration.Hostname.c_str());
 
 	// No authentication by default
 	ArduinoOTA.setPassword(DeviceConfiguration.Password.c_str());
@@ -595,15 +595,12 @@ void mqtt_reconnect()
 
 		if (MqttConfiguration.Auth)
 		{
-			MQTTClient_g.setCredentials(MqttConfiguration.Username.c_str(),
+			MQTTClient_g.setCredentials(
+				MqttConfiguration.Username.c_str(),
 				MqttConfiguration.Password.c_str());
-			MQTTClient_g.setClientId(DeviceConfiguration.DeviceName.c_str());
-		}
-		else
-		{
-			MQTTClient_g.setClientId(DeviceConfiguration.DeviceName.c_str());
 		}
 
+		MQTTClient_g.setClientId(NetworkConfiguration.Hostname.c_str());
 		MQTTClient_g.connect();
 	}
 }

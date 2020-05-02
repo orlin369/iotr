@@ -137,6 +137,15 @@
                                         <a href="javascript:getConnectionState(); getNetwork();" class="btn btn--m btn--blue">Refresh</a>
                                     </div>
                                 </div>
+                                <!-- Hostname -->
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <span class="form-label">Hostname:</span>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="hostname" name="hostname" value="" class="form-control" placeholder="Robot ID" required="required"/>
+                                    </div>
+                                </div>
                                 <!--SSID-->
                                 <div class="row">
                                     <div class="col xs-12 md-3 text-right">
@@ -152,7 +161,7 @@
                                         <label for="password" class="form-label">Password</label>
                                     </div>
                                     <div class="col xs-12 md-8">
-                                        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required"/>
+                                        <input type="password" id="password" name="password" class="form-control" placeholder="Password"/>
                                     </div>
                                 </div>
                                 <!-- Save -->

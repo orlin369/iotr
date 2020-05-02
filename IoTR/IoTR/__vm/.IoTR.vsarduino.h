@@ -98,7 +98,7 @@ typedef long __PTRDIFF_TYPE__;
 #include "Esp.h"
 
 
-#include "Arduino.h"
+#include "arduino.h"
 #include <pins_arduino.h> 
 
 #include "..\generic\Common.h"

@@ -66,7 +66,7 @@ void WEBServer::begin(FS* fs) {
 	// Q: I"ve not got this to work.
 	// Q: Need some investigation.
 	// A: DNS record does not update.
-	MDNS.begin(DeviceConfiguration.DeviceName.c_str());
+	MDNS.begin(NetworkConfiguration.Hostname.c_str());
 	MDNS.addService("http", "tcp", WEB_SERVER_PORT);
 
 	// Generate cookie.
@@ -509,7 +509,7 @@ void WEBServer::initRouts() {
 	// Identifier device name.
 	on(ROUT_API_ID, [this](AsyncWebServerRequest* request) {
 		String values = "";
-		values += DeviceConfiguration.DeviceName;
+		values += NetworkConfiguration.Hostname;
 		request->send(200, MIME_TYPE_PLAIN_TEXT, values);
 	});
 
@@ -1138,13 +1138,6 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 #pragma region Device
 
-			// https://www.guidgenerator.com/online-guid-generator.aspx
-			if (request->argName(index) == "deviceid") {
-				DeviceConfiguration.DeviceName = urlDecode(request->arg(index));
-				continue;
-			}
-
-
 			if (request->argName(index) == "baudrate") {
 				DeviceConfiguration.PortBaudrate = urlDecode(request->arg(index)).toInt();
 				continue;
@@ -1209,6 +1202,12 @@ void WEBServer::pageSendNetwork(AsyncWebServerRequest* request) {
 			DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
 #pragma region Network
+
+			// https://www.guidgenerator.com/online-guid-generator.aspx
+			if (request->argName(index) == "hostname") {
+				NetworkConfiguration.Hostname = urlDecode(request->arg(index));
+				continue;
+			}
 
 			// SSID
 			if (request->argName(index) == "ssid") {
@@ -1433,7 +1432,6 @@ void WEBServer::apiSendGeneralConfig(AsyncWebServerRequest* request) {
 
 	String values = "";
 	values += "userversion|" + String(ESP_FW_VERSION) + "|div\n";
-	values += "deviceid|" + (String)DeviceConfiguration.DeviceName + "|input\n";
 	values += "baudrate|" + String(DeviceConfiguration.PortBaudrate) + "|select\n";
 	values += "ntp-domain|" + (String)DeviceConfiguration.NTPDomain + "|input\n";
 	values += "ntp-tz|" + String(DeviceConfiguration.NTPTimezone) + "|select\n";
@@ -1455,7 +1453,8 @@ void WEBServer::apiSendNetConfig(AsyncWebServerRequest* request) {
 
 	String values = "";
 
-	values += "ssid|" + (String)NetworkConfiguration.SSID + "|input\n";
+	values += "hostname|" + NetworkConfiguration.Hostname + "|input\n";
+	values += "ssid|" + NetworkConfiguration.SSID + "|input\n";
 	values += "ip_0|" + (String)NetworkConfiguration.IP[0] + "|input\n";
 	values += "ip_1|" + (String)NetworkConfiguration.IP[1] + "|input\n";
 	values += "ip_2|" + (String)NetworkConfiguration.IP[2] + "|input\n";

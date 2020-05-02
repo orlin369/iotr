@@ -55,10 +55,10 @@ function DeviceStatus(url) {
 
             var rssi = document.getElementById("h-rssi");
             var percentage = toPercentage(status["rssi"]);
-            rssi.innerHTML = percentage.toFixed(2);
+            rssi.innerHTML = percentage.toFixed(0) + "%";
 
             var voltage = document.getElementById("h-voltage");
-            voltage.innerHTML = status["voltage"].toFixed(2) + "V";
+            voltage.innerHTML = status["voltage"] + "%";
 
             // TODO: Get it from flags.
             //var mqtt = document.getElementById("h-mqtt");
