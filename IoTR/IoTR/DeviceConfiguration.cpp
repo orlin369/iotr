@@ -75,7 +75,6 @@ bool load_device_config(FS* fileSystem, const char* path) {
 	DeviceConfiguration.Username = doc["user"].as<String>();
 	DeviceConfiguration.Password = doc["pass"].as<String>();
 	// Device
-	DeviceConfiguration.DeviceName = doc["device_name"].as<String>();
 	DeviceConfiguration.PortBaudrate = doc["port_baudrate"].as<int>();
 	// NTP
 	DeviceConfiguration.NTPDomain = doc["ntp_domain"].as<String>();
@@ -103,7 +102,6 @@ bool save_device_config(FS* fileSystem, const char* path) {
 	doc["user"] = DeviceConfiguration.Username;
 	doc["pass"] = DeviceConfiguration.Password;
 	// Device
-	doc["device_name"] = DeviceConfiguration.DeviceName;
 	doc["port_baudrate"] = DeviceConfiguration.PortBaudrate;
 	// NTP
 	doc["ntp_domain"] = DeviceConfiguration.NTPDomain;
@@ -142,7 +140,6 @@ bool set_default_device_config() {
 	DeviceConfiguration.Username = DEAFULT_USER;
 	DeviceConfiguration.Password = DEAFULT_PASS;
 	// Device
-	DeviceConfiguration.DeviceName = DEVICE_BRAND;
 	DeviceConfiguration.PortBaudrate = DEFAULT_BAUDRATE;
 	// NTP
 	DeviceConfiguration.NTPDomain = DEFAULT_NTP_DOMAIN;

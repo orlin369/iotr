@@ -62,7 +62,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct {
 	String Username = DEAFULT_USER; ///< User name. Set default value.
 	String Password = DEAFULT_PASS; ///< Password. Set default value.
-	String DeviceName = DEVICE_BRAND; ///< Device name.
 	int PortBaudrate = DEFAULT_BAUDRATE; ///< Remote device baudrate.
 	String NTPDomain = DEFAULT_NTP_DOMAIN; ///< NTP Domain.
 	int NTPPort = DEFAULT_NTP_PORT; ///< NTP Port.
