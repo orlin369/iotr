@@ -73,17 +73,18 @@ bool load_network_configuration(FS* fileSystem, const char* path) {
 	serializeJson(doc, temp);
 	DEBUGLOG("%s\r\n", temp.c_str());
 #endif // SHOW_CONFIG
+	NetworkConfiguration.Hostname = doc["hostname"].as<String>();
 
-	NetworkConfiguration.SSID = doc["SSID"].as<String>();
+	NetworkConfiguration.SSID = doc["ssid"].as<String>();
 
-	NetworkConfiguration.Password = doc["Password"].as<const char *>();
+	NetworkConfiguration.Password = doc["password"].as<const char *>();
 
-	NetworkConfiguration.IP = IPAddress(doc["IP"][0], doc["IP"][1], doc["IP"][2], doc["IP"][3]);
-	NetworkConfiguration.NetMask = IPAddress(doc["NetMask"][0], doc["NetMask"][1], doc["NetMask"][2], doc["NetMask"][3]);
-	NetworkConfiguration.Gateway = IPAddress(doc["Gateway"][0], doc["Gateway"][1], doc["Gateway"][2], doc["Gateway"][3]);
-	NetworkConfiguration.DNS = IPAddress(doc["DNS"][0], doc["DNS"][1], doc["DNS"][2], doc["DNS"][3]);
+	NetworkConfiguration.IP = IPAddress(doc["ip"][0], doc["ip"][1], doc["ip"][2], doc["ip"][3]);
+	NetworkConfiguration.NetMask = IPAddress(doc["nm"][0], doc["nm"][1], doc["nm"][2], doc["nm"][3]);
+	NetworkConfiguration.Gateway = IPAddress(doc["gw"][0], doc["gw"][1], doc["gw"][2], doc["gw"][3]);
+	NetworkConfiguration.DNS = IPAddress(doc["dns"][0], doc["dns"][1], doc["dns"][2], doc["dns"][3]);
 
-	NetworkConfiguration.DHCP = doc["DHCP"].as<bool>();
+	NetworkConfiguration.DHCP = doc["dhcp"].as<bool>();
 	
 	return true;
 }
@@ -103,34 +104,35 @@ bool save_network_configuration(FS* fileSystem, const char* path) {
 	DynamicJsonDocument doc(512);
 
 	//StaticJsonBuffer<1024> doc;
-	doc["SSID"] = NetworkConfiguration.SSID;
-	doc["Password"] = NetworkConfiguration.Password;
+	doc["hostname"] = NetworkConfiguration.Hostname;
+	doc["ssid"] = NetworkConfiguration.SSID;
+	doc["password"] = NetworkConfiguration.Password;
 
-	JsonArray jsonip = doc.createNestedArray("IP");
+	JsonArray jsonip = doc.createNestedArray("ip");
 	jsonip.add(NetworkConfiguration.IP[0]);
 	jsonip.add(NetworkConfiguration.IP[1]);
 	jsonip.add(NetworkConfiguration.IP[2]);
 	jsonip.add(NetworkConfiguration.IP[3]);
 
-	JsonArray jsonNM = doc.createNestedArray("NetMask");
+	JsonArray jsonNM = doc.createNestedArray("nm");
 	jsonNM.add(NetworkConfiguration.NetMask[0]);
 	jsonNM.add(NetworkConfiguration.NetMask[1]);
 	jsonNM.add(NetworkConfiguration.NetMask[2]);
 	jsonNM.add(NetworkConfiguration.NetMask[3]);
 
-	JsonArray jsonGateway = doc.createNestedArray("Gateway");
+	JsonArray jsonGateway = doc.createNestedArray("gw");
 	jsonGateway.add(NetworkConfiguration.Gateway[0]);
 	jsonGateway.add(NetworkConfiguration.Gateway[1]);
 	jsonGateway.add(NetworkConfiguration.Gateway[2]);
 	jsonGateway.add(NetworkConfiguration.Gateway[3]);
 
-	JsonArray jsondns = doc.createNestedArray("DNS");
+	JsonArray jsondns = doc.createNestedArray("dns");
 	jsondns.add(NetworkConfiguration.DNS[0]);
 	jsondns.add(NetworkConfiguration.DNS[1]);
 	jsondns.add(NetworkConfiguration.DNS[2]);
 	jsondns.add(NetworkConfiguration.DNS[3]);
 
-	doc["DHCP"] = NetworkConfiguration.DHCP;
+	doc["dhcp"] = NetworkConfiguration.DHCP;
 
 	File file = fileSystem->open(path, "w");
 	if (!file)
@@ -163,6 +165,7 @@ void set_default_network_configuration() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+	NetworkConfiguration.Hostname = DEVICE_BRAND;
 	NetworkConfiguration.SSID = DEFAULT_STA_SSID;
 	NetworkConfiguration.Password = DEFAULT_STA_PASSWORD;
 	NetworkConfiguration.DHCP = DEFAULT_ENABLED_DHCP;

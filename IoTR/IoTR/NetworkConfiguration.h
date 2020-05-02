@@ -62,7 +62,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *  Device configuration structure, it hold configuration parameters values.
  */
 typedef struct {
-	String SSID; ///< SSID of the near AP.
+    String Hostname = DEVICE_BRAND; ///< Hostname.
+    String SSID; ///< SSID of the near AP.
 	String Password; ///< Password of the near AP.
 	IPAddress  IP; ///< Local IP address.
 	IPAddress  NetMask; ///< Local network mask.
