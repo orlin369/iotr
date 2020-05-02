@@ -895,11 +895,12 @@ void loop()
 			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
 
 			DeviceStatus.Timestamp = NTPClient_g.getEpochTime(); // -DeviceConfiguration.NTPTimezone;
-			DeviceStatus.Voltage = map(analogRead(A0), 0, 1023, 0, 3.3);
+			DeviceStatus.Voltage = (int)map(analogRead(A0), 0, 1023, 0, 3.3);
 			DeviceStatus.RSSI = WiFi.RSSI();
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
-			DeviceStatus.Flags = 0;
-			// TODO: Flags
+			DeviceStatus.Flags = 0; // TODO: Flags
+			DeviceStatus.FreeHeap = ESP.getFreeHeap();
+			
 			// part of the flags. - MQTTClient_g.connected();
 
 			if (MQTTClient_g.connected())

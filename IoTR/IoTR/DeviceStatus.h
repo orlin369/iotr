@@ -45,9 +45,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct {
 	unsigned long Timestamp = 0; ///< Timestamp.
 	unsigned int Flags = 0; ///< Status flags.
-	float Voltage = 0; ///< Device voltage.
-	String SSID = ""; ///< Device name.
+	unsigned int FreeHeap = 0; ///< Heap.
+	int Voltage = 0; ///< Device voltage.
 	int RSSI = 0; ///< Device name.
+	String SSID = ""; ///< Device name.
 } DeviceStatus_t;
 
 /* @brief Singelton device stater instance. */

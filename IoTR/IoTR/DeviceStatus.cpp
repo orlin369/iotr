@@ -23,6 +23,7 @@ String dev_status_to_json()
 	json += ",\"rssi\":" + String(DeviceStatus.RSSI);
 	json += ",\"ssid\":\"" + DeviceStatus.SSID + "\"";
 	json += ",\"voltage\":" + String(DeviceStatus.Voltage);
+	json += ",\"free_heap\":" + String(DeviceStatus.FreeHeap);
 	json += ",\"flags\":" + String(DeviceStatus.Flags);
 	json += "}";
 
