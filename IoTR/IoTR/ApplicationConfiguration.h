@@ -158,9 +158,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULT_NTP_PORT 1337
 
-#define DEFAULT_NTP_TIMEZONE 7200
-
 #define DEFAULT_NTP_UPDATE_INTERVAL 60000UL
+
+#define DEFAULT_NTP_TIMEZONE 2
+
+#define SECS_IN_HOUR 3600
 
 #pragma endregion
 

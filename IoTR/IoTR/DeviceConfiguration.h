@@ -65,7 +65,7 @@ typedef struct {
 	int PortBaudrate = DEFAULT_BAUDRATE; ///< Remote device baudrate.
 	String NTPDomain = DEFAULT_NTP_DOMAIN; ///< NTP Domain.
 	int NTPPort = DEFAULT_NTP_PORT; ///< NTP Port.
-	int NTPTimezone = DEFAULT_NTP_TIMEZONE; ///< NTP Timezone offset.
+	int NTPTimezone = DEFAULT_NTP_TIMEZONE * SECS_IN_HOUR; ///< NTP Timezone offset.
 	int ActivationCode = 0; ///< Activation Code.
 } DeviceConfiguration_t;
 

@@ -1160,7 +1160,8 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 
 			if (request->argName(index) == "ntp-tz") {
-				DeviceConfiguration.NTPTimezone = urlDecode(request->arg(index)).toInt();
+				DeviceConfiguration.NTPTimezone = urlDecode(request->arg(index)).toInt() * SECS_IN_HOUR;
+				DEBUGLOG("TZ: %d\r\n", DeviceConfiguration.NTPTimezone);
 				continue;
 			}
 
@@ -1434,7 +1435,7 @@ void WEBServer::apiSendGeneralConfig(AsyncWebServerRequest* request) {
 	values += "userversion|" + String(ESP_FW_VERSION) + "|div\n";
 	values += "baudrate|" + String(DeviceConfiguration.PortBaudrate) + "|select\n";
 	values += "ntp-domain|" + (String)DeviceConfiguration.NTPDomain + "|input\n";
-	values += "ntp-tz|" + String(DeviceConfiguration.NTPTimezone) + "|select\n";
+	values += "ntp-tz|" + String(DeviceConfiguration.NTPTimezone / SECS_IN_HOUR) + "|select\n";
 	values += "acativation-code|" + String(DeviceConfiguration.ActivationCode) + "|input\n";
 
 	request->send(200, MIME_TYPE_PLAIN_TEXT, values);
