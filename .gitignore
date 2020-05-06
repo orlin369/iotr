@@ -424,4 +424,8 @@ MigrationBackup/
 # Visual Studio Code 
 /.vscode/*
 
+### Logs
+### Ignore logs.
+logs/
+
 # End of https://www.gitignore.io/api/c,c++,visualstudio
