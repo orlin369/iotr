@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Enable HTTP updates. */
 #define ENABLE_HTTP_OTA
 
-/** @brief Enable IR controll interface. */
+/** @brief Enable IR controls interface. */
 #define ENABLE_IR_INTERFACE
 
 /** @brief Enable Status LED. */
@@ -69,6 +69,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#define ENABLE_ROOMBA
 
+#define USE_PROGMEM_FS
+
 #pragma endregion
 
 #pragma region Device Conguration
@@ -79,7 +81,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Default STA password. */
 #define DEAFULT_PASS "admin"
 
-/** @brief Default device audrate. */
+/** @brief Default device baud rate. */
 #define DEFAULT_BAUDRATE 9600
 
 #pragma endregion
@@ -181,7 +183,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Main domain of the IoTR servers. */
 //#define UPDATE_SERVER_DOMAIN "http://your.domain/"
 
-/** @brief ESP updatest root endpoint. */
+/** @brief ESP updates root endpoint. */
 //#define UPDATE_SERVER_PATH_ESP "updater/esp/index.php"
 
 /** @brief ESP version root endpoint. */

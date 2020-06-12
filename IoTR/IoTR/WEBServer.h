@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Definitions
 
+#define ESS_LOG "log"
 #define ESS_IR_CMD "irCommand"
 #define ESS_DEV_STATE "deviceState"
 #define ESS_DEV_STATUS "deviceStatus"
@@ -64,8 +65,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma endregion
 
-
-
 #pragma region Headers
 
 #include <ESP8266WiFi.h>
@@ -93,6 +92,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "GeneralHelper.h"
 
+#ifdef USE_PROGMEM_FS
+#include "src\bzf_dashboard.h"
+#include "src\bzf_dev_status.h"
+#include "src\bzf_edit.h"
+#include "src\bzf_favicon.h"
+#include "src\bzf_login.h"
+#include "src\bzf_microajax.h"
+#include "src\bzf_mqtt.h"
+#include "src\bzf_network.h"
+#include "src\bzf_settings.h"
+#include "src\bzf_style.min.h"
+#endif // USE_PROGMEM_FS
+
 #pragma endregion
 
 class WEBServer : public AsyncWebServer {
@@ -118,7 +130,6 @@ public:
 	 */
 	void update();
 	
-
 	 /** @brief Updates device status.
 	  *  @param data, String JSON status.
 	  *  @return Void
@@ -133,8 +144,6 @@ public:
 	 *  @return Void.
 	 */
 	void sendDeviceState(String device_state);
-
-
 
 	/** @brief Set start process function. Part of the API.
 	 *  @param callback, Start function.
@@ -271,7 +280,7 @@ protected:
 	 */
 	void apiSendConnState(AsyncWebServerRequest* request);
 
-	/** @brief Send connetion information values. Part of the API.
+	/** @brief Send connection information values. Part of the API.
 	 *  @param request, AsyncWebServerRequest request object.
 	 *  @return Void.
 	 */
@@ -345,7 +354,7 @@ protected:
 
 };
 
-/* @brief Singelton Smart scale server instance. */
+/* @brief Singleton Smart scale server instance. */
 extern WEBServer LocalWEBServer;
 
 #endif

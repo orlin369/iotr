@@ -396,7 +396,7 @@ void configure_arduino_ota() {
 	// Port defaults to 8266
 	// ArduinoOTA.setPort(8266);
 
-	// Hostname defaults to esp8266-[ChipID]
+	// Host name defaults to esp8266-[ChipID]
 	ArduinoOTA.setHostname(NetworkConfiguration.Hostname.c_str());
 
 	// No authentication by default
@@ -877,7 +877,7 @@ void loop()
 		// Update date and time.
 		NTPClient_g.update();
 
-		// Reconnect MQTT if nasisery.
+		// Reconnect MQTT if necessary.
 		if (!MQTTClient_g.connected())
 		{
 			mqtt_reconnect();
@@ -887,7 +887,7 @@ void loop()
 			read_device_statue();
 		}
 
-		// If heartbeat expired then run trought.
+		// If heartbeat expired then run trough.
 		HeartbeatTimer_g.update();
 		if (HeartbeatTimer_g.expired())
 		{

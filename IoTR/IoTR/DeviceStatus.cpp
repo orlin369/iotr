@@ -4,12 +4,11 @@
 
 #include "DeviceStatus.h"
 
-/* @brief Singelton device stater instance. */
+/* @brief Singleton device stater instance. */
 DeviceStatus_t DeviceStatus;
 
-String dev_status_to_json()
-{
-	/*
+String dev_status_to_json() {
+/*
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);

@@ -105,7 +105,7 @@ void WEBServer::displayLog(String line) {
 #endif // SHOW_FUNC_NAMES
 
 	if (m_webSocketEvents.count() > 0) {
-		m_webSocketEvents.send(line.c_str(), "log");
+		m_webSocketEvents.send(line.c_str(), ESS_LOG);
 	}
 }
 
@@ -415,6 +415,7 @@ void WEBServer::initRouts() {
 			this->goToLogin(request);
 			return;
 		}
+
 		if (!this->handleFileRead("/settings.html", request))
 		{
 			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
@@ -849,6 +850,7 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest *request) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+
 	DEBUGLOG("File: %s\r\n", path.c_str());
 
 	if (!this->isLoggedin(request) && path != "/login.html" && path != "/style.min.css")
@@ -856,37 +858,113 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest *request) {
 		return false;
 	}
 
-	String contentType = getContentType(path, request);
-	String pathWithGz = path + ".gz";
-	if (m_fileSystem->exists(pathWithGz) || m_fileSystem->exists(path))
-	{
-		if (m_fileSystem->exists(pathWithGz))
-		{
-			path += ".gz";
-		}
+	bool FileFoundL = false;
+	bool ProgMemFileFlagL = false;
+	AsyncWebServerResponse* response;
 
-		DEBUGLOG("Content type: %s\r\n", contentType.c_str());
-		
-		AsyncWebServerResponse *response = request->beginResponse(*m_fileSystem, path, contentType);		
+#ifdef USE_PROGMEM_FS
+	if (path == BZF_LOGIN_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_LOGIN_MT, bzf_login, BZF_LOGIN_SIZE);
+	}
+	else if (path == BZF_DASHBOARD_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_DASHBOARD_MT, bzf_dashboard, BZF_DASHBOARD_SIZE);
+	}
+	else if (path == BZF_SETTINGS_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_SETTINGS_MT, bzf_settings, BZF_SETTINGS_SIZE);
+	}
+	else if (path == BZF_NETWORK_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_NETWORK_MT, bzf_network, BZF_NETWORK_SIZE);
+	}
+	else if (path == BZF_MQTT_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_MQTT_MT, bzf_mqtt, BZF_MQTT_SIZE);
+	}
+	else if (path == BZF_STYLE_MIN_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_STYLE_MIN_MT, bzf_style_min, BZF_STYLE_MIN_SIZE);
+	}
+	else if (path == BZF_MICROAJAX_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_MICROAJAX_MT, bzf_microajax, BZF_MICROAJAX_SIZE);
+	}
+	else if (path == BZF_DEV_STATUS_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_DEV_STATUS_MT, bzf_dev_status, BZF_DEV_STATUS_SIZE);
+	}
+#ifdef ENABLE_EDITOR
+	else if (path == BZF_EDIT_PATH)
+	{
+		ProgMemFileFlagL = true;
+		response = request->beginResponse_P(200, BZF_EDIT_MT, bzf_edit, BZF_EDIT_SIZE);
+	}
+#endif
+
+	// If it is part of the program memory segment.
+	if (ProgMemFileFlagL)
+	{
+		FileFoundL = true;
 		response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response->addHeader("Pragma", "no-cache");
 		response->addHeader("Expires", "0");
-
-		if (path.endsWith(".gz"))
-		{
-			response->addHeader("Content-Encoding", "gzip");
-		}
-
-		DEBUGLOG("File %s EXIST\r\n", path.c_str());
+		response->addHeader("Content-Encoding", "gzip");
 		request->send(response);
-		// delete response; // Free up memory!
-		DEBUGLOG("File %s SENT\r\n", path.c_str());
-
-		return true;
 	}
 
-	DEBUGLOG("File %s MISSING\r\n", path.c_str());
-	return false;
+#endif // USE_PROGMEM_FS
+
+	// Check file system for this file.
+	if (!ProgMemFileFlagL)
+	{
+		String contentType = getContentType(path, request);
+		String pathWithGz = path + ".gz";
+		if (m_fileSystem->exists(pathWithGz) || m_fileSystem->exists(path))
+		{
+			if (m_fileSystem->exists(pathWithGz))
+			{
+				path += ".gz";
+			}
+
+			DEBUGLOG("Content type: %s\r\n", contentType.c_str());
+
+			response = request->beginResponse(*m_fileSystem, path, contentType);
+			response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+			response->addHeader("Pragma", "no-cache");
+			response->addHeader("Expires", "0");
+
+			if (path.endsWith(".gz"))
+			{
+				response->addHeader("Content-Encoding", "gzip");
+			}
+
+			DEBUGLOG("File %s EXIST\r\n", path.c_str());
+			// Mark as found.
+			FileFoundL = true;
+			request->send(response);
+			// delete response; // Free up memory!
+			DEBUGLOG("File %s SENT\r\n", path.c_str());
+
+		}
+	}
+
+	// If it is not part of the RPOGMEM or FS.
+	//else
+	//{
+	//	DEBUGLOG("File %s MISSING\r\n", path.c_str());
+	//}
+
+	return FileFoundL;
 }
 
 /** @brief Create file.
@@ -1178,11 +1256,23 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 		Serial.flush();
 	}
 
+#ifdef USE_PROGMEM_FS
+	DEBUGLOG("1");
+	AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", bzf_settings, BZF_SETTINGS_SIZE);
+	response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+	response->addHeader("Pragma", "no-cache");
+	response->addHeader("Expires", "0");
+	response->addHeader("Content-Encoding", "gzip");
+	request->send(response);
+	DEBUGLOG("2");
+	return;
+#else
 	if (!this->handleFileRead("/settings.html", request))
 	{
 		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
+#endif // USE_PROGMEM_FS
 }
 
 /** @brief Network arguments parser. Part of the API.
@@ -1510,7 +1600,7 @@ void WEBServer::apiSendConnState(AsyncWebServerRequest* request) {
 	Networks = "";
 }
 
-/** @brief Send connetion information values. Part of the API.
+/** @brief Send connection information values. Part of the API.
  *  @param request, AsyncWebServerRequest request object.
  *  @return Void.
  */
@@ -1682,6 +1772,9 @@ void WEBServer::eventUpdateHandler(void* arg) {
 		self->clearAliveTime();
 		self->m_Cookie = self->genSession();
 	}
+
+	// TODO: Clean old connections.
+	// self->m_webSocketEvents.cleanClients();
 }
 
 #pragma endregion
