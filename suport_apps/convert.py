@@ -58,6 +58,12 @@ __status__ = "Debug"
 
 #endregion
 
+class CPPWriter:
+
+    def __init__(self):
+
+        pass
+
 def get_content_type(filename):
 
     mime_type = "text/plain"
