@@ -5,139 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>IoTR - SETTINGS</title>
+        <link href="reset.css" rel="stylesheet" type="text/css">
         <link href="style.min.css" rel="stylesheet" type="text/css">
         <style>
-            /* CSS RESET */
-            
-            html,
-            body,
-            div,
-            span,
-            applet,
-            object,
-            iframe,
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6,
-            p,
-            blockquote,
-            pre,
-            a,
-            abbr,
-            acronym,
-            address,
-            big,
-            cite,
-            code,
-            del,
-            dfn,
-            em,
-            img,
-            ins,
-            kbd,
-            q,
-            s,
-            samp,
-            small,
-            strike,
-            strong,
-            sub,
-            sup,
-            tt,
-            var,
-            b,
-            u,
-            i,
-            center,
-            dl,
-            dt,
-            dd,
-            ol,
-            ul,
-            li,
-            fieldset,
-            form,
-            label,
-            legend,
-            table,
-            caption,
-            tbody,
-            tfoot,
-            thead,
-            tr,
-            th,
-            td,
-            article,
-            aside,
-            canvas,
-            details,
-            embed,
-            figure,
-            figcaption,
-            footer,
-            header,
-            hgroup,
-            menu,
-            nav,
-            output,
-            ruby,
-            section,
-            summary,
-            time,
-            mark,
-            audio,
-            video {
-                margin: 0;
-                padding: 0;
-                border: 0;
-                font-size: 100%;
-                font: inherit;
-                vertical-align: baseline;
-            }
-            
-            article,
-            aside,
-            details,
-            figcaption,
-            figure,
-            footer,
-            header,
-            hgroup,
-            menu,
-            nav,
-            section {
-                display: block;
-            }
-            
-            body {
-                line-height: 1;
-            }
-            
-            ol,
-            ul {
-                list-style: none;
-            }
-            
-            blockquote,
-            q {
-                quotes: none;
-            }
-            
-            blockquote:before,
-            blockquote:after,
-            q:before,
-            q:after {
-                content: '';
-                content: none;
-            }
-            
-            table {
-                border-collapse: collapse;
-                border-spacing: 0;
-            }
+           
             /* CONTAINERS */
             
             .container {
@@ -291,6 +162,13 @@
             .f-right-wheel.f-active {
                 border-color: #32cd32;
             }
+
+            /* Do not enter to the file */
+            .dbg
+            {
+                display:inline-block;
+                overflow-y:auto;
+            }
         </style>
     </head>
     <body class="with-fixed-menu">
@@ -304,7 +182,7 @@
                     <li><a href="/settings" class="link">Settings</a></li>
                     <li><a href="/network" class="link">Network</a></li>
                     <li><a href="/mqtt" class="link">MQTT</a></li>
-                    <li><a href="#" class="link">Help</a></li>
+                    <li><a href="/help" class="link">Help</a></li>
                     <li><a href="/logout" class="link">Logout</a></li>
                 </ul>
             </div>
@@ -341,7 +219,7 @@
                     </div>
                 </div>
                 <div class="col xs-12 md-4">
-                    <text id="dbg" class="form-control"></text>
+                    <text id="dbg" class="dbg form-control"></text>
                 </div>
             </div>
             <div class="row">
@@ -565,6 +443,13 @@
                 };
             }
 
+            function resizeDgb()
+            {
+                var height = document.getElementsByClassName('f-circle')[0].clientHeight;
+                if(height < 200) height = 200;
+                document.getElementById('dbg').style = "height:" + height + 'px';
+            }
+
             window.onload = function () {
                 var url = "/api/v1/events";
 
@@ -576,6 +461,12 @@
 
                 var deviceStatus = new DeviceStatus(url);
                 deviceStatus.init();
+                resizeDgb();
+            }
+
+            window.onresize = function()
+            {
+                resizeDgb();
             }
         </script>
     </body>
