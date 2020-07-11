@@ -56,20 +56,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ENABLE_HTTP_OTA
 
 /** @brief Enable IR controls interface. */
-#define ENABLE_IR_INTERFACE
+//#define ENABLE_IR_INTERFACE
 
 /** @brief Enable Status LED. */
-#define ENABLE_STATUS_LED
+//#define ENABLE_STATUS_LED
 
 /** @brief Enable device control. */
 #define ENABLE_DEVICE_CONTROL
 
 /** @brief Enable software ON and OFF. */
-#define EANBLE_SOFTWARE_ONOFF
+//#define EANBLE_SOFTWARE_ONOFF
 
 //#define ENABLE_ROOMBA
 
 #define USE_PROGMEM_FS
+
+/** @brief Enable rescue button. */
+//#define ENABLE_RESCUE_BTN
+
+#ifndef ARDUINO_ESP8266_NODEMCU
+static const uint8_t D1 = 5;
+static const uint8_t D2 = 4;
+static const uint8_t D3 = 0;
+#endif // !ARDUINO_ESP8266_NODEMCU
 
 #pragma endregion
 
@@ -194,7 +203,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region IR Configuration
 
 #ifdef ENABLE_IR_INTERFACE
-#define PIN_IR_RECV D7
+#define PIN_IR_RECV D3
 #endif // ENABLE_IR_INTERFACE
 
 #pragma endregion
@@ -202,8 +211,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Command Module
 
 #ifdef ENABLE_DEVICE_CONTROL
-#define PIN_KILL_SW D2
-#define PIN_SW_ENABLE D3
+#define PIN_KILL_SW D3
+#define PIN_SW_ENABLE D2
 #endif // ENABLE_DEVICE_CONTROL
 
 #pragma endregion
@@ -211,7 +220,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Status LED Configuration
 
 #ifdef ENABLE_STATUS_LED
-
 /** @brief Status LED pin */
 #define PIN_RGB_LED D5
 #endif // ENABLE_STATUS_LED
@@ -221,8 +229,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma region Self power Controll
 
 #ifdef EANBLE_SOFTWARE_ONOFF
-#define PIN_PON D3
+#define PIN_PON D4
 #endif // EANBLE_SOFTWARE_ONOFF
+
+#pragma endregion
+
+#pragma region Resque Button
+
+#ifdef ENABLE_RESCUE_BTN
+
+#define PIN_DEVICE_RESCUE D1
+
+#endif // ENABLE_RESCUE_BTN
 
 #pragma endregion
 
@@ -245,5 +263,11 @@ https://hackster.imgix.net/uploads/attachments/669065/screen_shot_2018-11-27_at_
 */
 
 #endif // ENABLE_ROOMBA
+
+#define TOPIC_SER_OUT "roboleague/iotr/KerelV1/serial/out"
+#define TOPIC_SER_IN  "roboleague/iotr/KerelV1/serial/in"
+#define TOPIC_STAT    "roboleague/iotr/KerelV1/status"
+#define TOPIC_UPDATE  "roboleague/iotr/KerelV1/update"
+#define TOPIC_IR      "roboleague/iotr/KerelV1/ir"
 
 #endif // _APPLICATIONCONFIGURATION_h

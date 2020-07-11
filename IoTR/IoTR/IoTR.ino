@@ -68,6 +68,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "StatusLed.h"
 #endif // ENABLE_STATUS_LED
 
+#ifdef ENABLE_RESCUE_BTN
+#include "RescueButton.h"
+#endif // ENABLE_RESCUE_BTN
+
 #pragma endregion
 
 #pragma region Variables
@@ -88,10 +92,10 @@ AsyncMqttClient MQTTClient_g;
 
 #ifdef ENABLE_IR_INTERFACE
 
-/* @brief IR reciver. */
+/* @brief IR receiver. */
 IRrecv IRReciver_g(PIN_IR_RECV);
 
-/* @brief IR reciever result. */
+/* @brief IR receiver result. */
 decode_results IRResults_g;
 
 #endif // ENABLE_IR_INTERFACE
@@ -452,6 +456,23 @@ void configure_arduino_ota() {
 
 #pragma endregion
 
+#pragma region NTP
+
+void configure_ntp() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	NTPClient_g.setPoolServerName(DeviceConfiguration.NTPDomain.c_str());
+	NTPClient_g.setTimeOffset(DeviceConfiguration.NTPTimezone);
+	NTPClient_g.setUpdateInterval(DEFAULT_NTP_UPDATE_INTERVAL);
+	NTPClient_g.begin(DEFAULT_NTP_PORT);
+}
+
+#pragma endregion
+
 #pragma region MQTT Service
 
 void onMqttConnect(bool sessionPresent) {
@@ -461,23 +482,19 @@ void onMqttConnect(bool sessionPresent) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+	uint16_t PacketIdSubL;
+
 	DEBUGLOG("Connected to MQTT.\r\n");
 	DEBUGLOG("Session present: %d\r\n", sessionPresent);
 
-	uint16_t packetIdSub = MQTTClient_g.subscribe("test/device/update", 2);
-	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub);
+	// PacketIdSubL = MQTTClient_g.subscribe(TOPIC_SER_OUT, 2);
+	// DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 
-	//uint16_t packetIdSub2 = MQTTClient_g.subscribe("test/TIME", 2);
-	//DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", packetIdSub2);
+	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_SER_OUT, 2);
+	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 
-	//MQTTClient_g.publish("test/lol", 0, true, "test 1");
-	//DEBUGLOG("Publishing at QoS 0\r\n");
-
-	//uint16_t packetIdPub1 = MQTTClient_g.publish("test/lol", 1, true, "test 2");
-	//DEBUGLOG("Publishing at QoS 1, packetId: %d\r\n", packetIdPub1);
-
-	//uint16_t packetIdPub2 = MQTTClient_g.publish("test/lol", 2, true, "test 3");
-	//DEBUGLOG("Publishing at QoS 2, packetId: %d\r\n", packetIdPub2);
+	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_STAT, 2);
+	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -531,7 +548,7 @@ void onMqttMessage(
 #endif // SHOW_FUNC_NAMES
 
 	String tp = String(topic);
-	if (tp == "test/device/update")
+	if (tp == TOPIC_UPDATE)
 	{
 		if ((uint8_t)payload[0] != (uint8_t)ESP_FW_VERSION)
 		{
@@ -605,22 +622,36 @@ void mqtt_reconnect()
 	}
 }
 
-#pragma endregion
+/** @brief Read incoming data from the serial buffer.
+ *  @return Void.
+ */
+void read_device_serial()
+{
+	static String IncommingCommnad = "";
 
-#pragma region NTP
+	// Fill the command data buffer with command.
+	while (Serial.available())
+	{
+		// Add new char.
+		IncommingCommnad += (char)Serial.read();
+		// Wait a while for a a new char.
+		delay(5);
+		//ESP.wdtFeed();
+		yield();
+	}
 
-void configure_ntp() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
+	// If command if not empty parse it.
+	if (IncommingCommnad != "")
+	{
+		// Publish message.
+		MQTTClient_g.publish(TOPIC_SER_IN, 2, true, IncommingCommnad.c_str());
+	}
 
-	NTPClient_g.setPoolServerName(DeviceConfiguration.NTPDomain.c_str());
-	NTPClient_g.setTimeOffset(DeviceConfiguration.NTPTimezone);
-	NTPClient_g.setUpdateInterval(DEFAULT_NTP_UPDATE_INTERVAL);
-	NTPClient_g.begin(DEFAULT_NTP_PORT);
+	// Clear the command data buffer.
+	IncommingCommnad = "";
 }
+
+#pragma endregion
 
 #pragma endregion
 
@@ -662,37 +693,6 @@ void start_device() {
 	CommandModule.enable(true);
 #endif // ENABLE_DEVICE_CONTROL
 }
-
-/** @brief Read incoming data from the serial buffer.
- *  @return Void.
- */
-void read_device_statue()
-{
-	static String IncommingCommnad = "";
-
-	// Fill the command data buffer with command.
-	while (Serial.available())
-	{
-		// Add new char.
-		IncommingCommnad += (char)Serial.read();
-		// Wait a while for a a new char.
-		delay(5);
-		//ESP.wdtFeed();
-		yield();
-	}
-
-	// If command if not empty parse it.
-	if (IncommingCommnad != "")
-	{
-		// Publish message.
-		MQTTClient_g.publish("test/device/out", 2, true, IncommingCommnad.c_str());
-	}
-
-	// Clear the command data buffer.
-	IncommingCommnad = "";
-}
-
-#pragma endregion
 
 #pragma endregion
 
@@ -763,6 +763,7 @@ void setup()
 	// Setup debug port module.
 	setup_debug_port();
 
+	//
 	Serial.begin(DeviceConfiguration.PortBaudrate);
 
 #ifdef ENABLE_ROOMBA
@@ -771,9 +772,12 @@ void setup()
 	turnCW(40, 180);
 #endif // ENABLE_ROOMBA
 
+#ifdef ENABLE_RESCUE_BTN
+	config_rescue_procedure();
+#endif // ENABLE_RESCUE_BTN
+
 	// Turn ON the self power latch.
 	power_on();
-
 
 	// Configure command module.
 	configure_command_module();
@@ -844,6 +848,10 @@ void setup()
 
 void loop()
 {
+#ifdef ENABLE_RESQUE_BTN
+	update_recue_procedure();
+#endif // ENABLE_RESQUE_BTN
+
 #ifdef ENABLE_DEVICE_CONTROL
 	CommandModule.update();
 #endif // ENABLE_DEVICE_CONTROL
@@ -856,8 +864,10 @@ void loop()
 		DeviceStateTimer_g.clear();
 
 		LocalWEBServer.sendDeviceStatus(dev_status_to_json());
+
 		LocalWEBServer.sendDeviceState(dev_state_to_json());
 
+		// Below code will be removed after release.
 		DeviceState.BumpersAndWheelDrops++;
 		DeviceState.Wall = !DeviceState.Wall;
 		DeviceState.CliffLeft = !DeviceState.CliffLeft;
@@ -884,7 +894,7 @@ void loop()
 		}
 		else
 		{
-			read_device_statue();
+			read_device_serial();
 		}
 
 		// If heartbeat expired then run trough.
@@ -905,7 +915,7 @@ void loop()
 
 			if (MQTTClient_g.connected())
 			{
-				MQTTClient_g.publish("test/device/state", 0, true, dev_status_to_json().c_str());
+				MQTTClient_g.publish(TOPIC_STAT, 0, true, dev_status_to_json().c_str());
 			}
 		}
 	}
@@ -939,7 +949,7 @@ void loop()
 			}
 			if (MQTTClient_g.connected())
 			{
-				MQTTClient_g.publish("test/device/ir", 2, true, String(IRResults_g.command).c_str());
+				MQTTClient_g.publish(TOPIC_IR, 2, true, String(IRResults_g.command).c_str());
 			}
 #endif // ENABLE_DEVICE_CONTROL
 		}

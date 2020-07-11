@@ -46,6 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ROUT_PAGE_SETTINGS "/settings"
 #define ROUT_PAGE_NETWORK "/network"
 #define ROUT_PAGE_MQTT "/mqtt"
+#define ROUT_PAGE_HELP "/help"
 #define ROUT_PAGE_LOGOUT "/logout"
 
 #define ROUT_API_ID "/api/v1/identify"
@@ -60,6 +61,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ROUT_API_DEVICE_START "/api/v1/device/start"
 #define ROUT_API_REBOOT "/api/v1/reboot"
 #define ROUT_API_UPLOAD "/api/v1/upload"
+#define ROUT_API_EVENTS "/api/v1/events"
 
 #define MIME_TYPE_PLAIN_TEXT "text/plain"
 
@@ -97,10 +99,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "src\bzf_dev_status.h"
 #include "src\bzf_edit.h"
 #include "src\bzf_favicon.h"
+#include "src\bzf_help.h"
 #include "src\bzf_login.h"
+#include "src\bzf_logo.h"
 #include "src\bzf_microajax.h"
 #include "src\bzf_mqtt.h"
 #include "src\bzf_network.h"
+#include "src\bzf_reset.h"
 #include "src\bzf_settings.h"
 #include "src\bzf_style.min.h"
 #endif // USE_PROGMEM_FS
@@ -178,7 +183,7 @@ protected:
 	Ticker m_eventUpdater;
 
 	/* @brief Events API handler. */
-	AsyncEventSource m_webSocketEvents = AsyncEventSource("/api/v1/events");
+	AsyncEventSource m_webSocketEvents = AsyncEventSource(ROUT_API_EVENTS);
 
 	unsigned int m_keepAliveTime = 0;
 
@@ -206,13 +211,6 @@ protected:
 	 */
 	void handleFileList(AsyncWebServerRequest *request);
 
-	/** @brief Read file.
-	 *  @param path String, File path.
-	 *  @param request AsyncWebServerRequest, Request object.
-	 *  @return Void.
-	 */
-	bool handleFileRead(String path, AsyncWebServerRequest *request);
-
 	/** @brief Create file.
 	 *  @param request AsyncWebServerRequest, Request object.
 	 *  @return Void.
@@ -237,6 +235,14 @@ protected:
 	void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8 *data, size_t len, bool final);
 
 #endif // ENABLE_EDITOR
+
+	/** @brief Read file.
+	 *  @param path String, File path.
+	 *  @param request AsyncWebServerRequest, Request object.
+	 *  @return Void.
+	 */
+	bool handleFileRead(String path, AsyncWebServerRequest* request);
+
 
 	/** @brief Settings arguments parser. Part of the API.
 	 *  @param request, AsyncWebServerRequest request object.
@@ -305,13 +311,13 @@ protected:
 	void apiSendMqttCfg(AsyncWebServerRequest* request);
 
 	/** @brief Check the authorization status.
-	 *  @param request, AsyncWebServer Request request object.
+	 *  @param request, AsyncWebServerRequest request object.
 	 *  @return boolean, True have to authenticate.
 	 */
 	bool isLoggedin(AsyncWebServerRequest *request);
 
 	/** @brief Redirect to login page.
-	 *  @param request, AsyncWebServer Request request object.
+	 *  @param request, AsyncWebServerRequest request object.
 	 *  @return Void.
 	 */
 	void goToLogin(AsyncWebServerRequest* request);
@@ -325,6 +331,12 @@ protected:
 	 *  @return Void.
 	 */
 	void clearAliveTime();
+
+	/** @brief Template processor.
+	 *  @param var, const String& NAme of the template.
+	 *  @return String, Template content.
+	 */
+	//static String templateProcessor(const String& var);
 
 	/** @brief Convert file extension to content type.
 	 *  @param filename, String Name of the file.

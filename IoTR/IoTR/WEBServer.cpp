@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Variables
 
-/* @brief Singelton Smart scale server instance. */
+/* @brief Singleton Smart scale server instance. */
 WEBServer LocalWEBServer(WEB_SERVER_PORT);
 
 #pragma endregion
@@ -152,7 +152,7 @@ void WEBServer::sendDeviceStatus(String data) {
 #endif // SHOW_FUNC_NAMES
 */
 
-	// Chack does have someone connected.
+	// Check does have someone connected.
 	if (m_webSocketEvents.count() > 0)
 	{
 		m_webSocketEvents.send(data.c_str(), ESS_DEV_STATUS);
@@ -188,7 +188,7 @@ void WEBServer::setCbStopDevice(void(*callback)(void)) {
 }
 
 /** @brief Set reboot process function. Part of the API.
- *  @param callback, Stop functio.
+ *  @param callback, Stop function.
  *  @return Void.
  */
 void WEBServer::setCbReboot(void(*callback)(void)) {
@@ -214,6 +214,38 @@ void WEBServer::initRouts() {
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
+
+#pragma region Serve Static
+
+	on(BZF_RESET_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->handleFileRead(BZF_RESET_PATH, request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+		});
+
+	on(BZF_STYLE_MIN_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->handleFileRead(BZF_STYLE_MIN_PATH, request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+		});
+
+	on(BZF_LOGO_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->handleFileRead(BZF_LOGO_PATH, request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+		});
+
+	on(BZF_FAVICON_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->handleFileRead(BZF_FAVICON_PATH, request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+		});
+
+#pragma endregion
 
 #pragma region File editor API
 
@@ -325,10 +357,9 @@ void WEBServer::initRouts() {
 			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			request->send(response);
-			// delete response; // Free up memory!
 		}
 		else
-		{
+		{			
 			if (!this->handleFileRead("/login.html", request))
 			{
 				request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
@@ -344,7 +375,6 @@ void WEBServer::initRouts() {
 			response->addHeader("Location", ROUT_PAGE_DASHBOARD);
 			response->addHeader("Cache-Control", "no-cache");
 			request->send(response);
-			// delete response; // Free up memory!
 		}
 		else
 		{
@@ -502,6 +532,26 @@ void WEBServer::initRouts() {
 
 		clearAliveTime();
 	});
+
+#pragma endregion
+
+#pragma region Help page API
+
+	// /help
+	on(ROUT_PAGE_HELP, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->isLoggedin(request))
+		{
+			this->goToLogin(request);
+			return;
+		}
+
+		if (!this->handleFileRead("/help.html", request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+
+		clearAliveTime();
+		});
 
 #pragma endregion
 
@@ -688,14 +738,19 @@ void WEBServer::initRouts() {
 	// Called when the URL is not defined here.
 	// Use it to load content from SPIFFS.
 	onNotFound([this](AsyncWebServerRequest *request) {
-		DEBUGLOG("Not found: %s\r\n", request->url().c_str());
+		if (!this->isLoggedin(request))
+		{
+			this->goToLogin(request);
+			return;
+		}
+
 		AsyncWebServerResponse *response = request->beginResponse(200);
 		response->addHeader("Connection", "close");
 		if (!this->handleFileRead(request->url(), request))
 		{
+			DEBUGLOG("Not found: %s\r\n", request->url().c_str());
 			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
-		// delete response; // Free up memory!
 	});
 
 #pragma endregion
@@ -836,135 +891,6 @@ void WEBServer::handleFileList(AsyncWebServerRequest *request) {
 	output += "]";
 	DEBUGLOG("%s\r\n", output.c_str());
 	request->send(200, "text/json", output);
-}
-
-/** @brief Read file.
- *  @param path String, File path.
- *  @param request AsyncWebServerRequest, Request object.
- *  @return Void.
- */
-bool WEBServer::handleFileRead(String path, AsyncWebServerRequest *request) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-
-	DEBUGLOG("File: %s\r\n", path.c_str());
-
-	if (!this->isLoggedin(request) && path != "/login.html" && path != "/style.min.css")
-	{
-		return false;
-	}
-
-	bool FileFoundL = false;
-	bool ProgMemFileFlagL = false;
-	AsyncWebServerResponse* response;
-
-#ifdef USE_PROGMEM_FS
-	if (path == BZF_LOGIN_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_LOGIN_MT, bzf_login, BZF_LOGIN_SIZE);
-	}
-	else if (path == BZF_DASHBOARD_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_DASHBOARD_MT, bzf_dashboard, BZF_DASHBOARD_SIZE);
-	}
-	else if (path == BZF_SETTINGS_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_SETTINGS_MT, bzf_settings, BZF_SETTINGS_SIZE);
-	}
-	else if (path == BZF_NETWORK_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_NETWORK_MT, bzf_network, BZF_NETWORK_SIZE);
-	}
-	else if (path == BZF_MQTT_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_MQTT_MT, bzf_mqtt, BZF_MQTT_SIZE);
-	}
-	else if (path == BZF_STYLE_MIN_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_STYLE_MIN_MT, bzf_style_min, BZF_STYLE_MIN_SIZE);
-	}
-	else if (path == BZF_MICROAJAX_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_MICROAJAX_MT, bzf_microajax, BZF_MICROAJAX_SIZE);
-	}
-	else if (path == BZF_DEV_STATUS_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_DEV_STATUS_MT, bzf_dev_status, BZF_DEV_STATUS_SIZE);
-	}
-#ifdef ENABLE_EDITOR
-	else if (path == BZF_EDIT_PATH)
-	{
-		ProgMemFileFlagL = true;
-		response = request->beginResponse_P(200, BZF_EDIT_MT, bzf_edit, BZF_EDIT_SIZE);
-	}
-#endif
-
-	// If it is part of the program memory segment.
-	if (ProgMemFileFlagL)
-	{
-		FileFoundL = true;
-		response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-		response->addHeader("Pragma", "no-cache");
-		response->addHeader("Expires", "0");
-		response->addHeader("Content-Encoding", "gzip");
-		request->send(response);
-	}
-
-#endif // USE_PROGMEM_FS
-
-	// Check file system for this file.
-	if (!ProgMemFileFlagL)
-	{
-		String contentType = getContentType(path, request);
-		String pathWithGz = path + ".gz";
-		if (m_fileSystem->exists(pathWithGz) || m_fileSystem->exists(path))
-		{
-			if (m_fileSystem->exists(pathWithGz))
-			{
-				path += ".gz";
-			}
-
-			DEBUGLOG("Content type: %s\r\n", contentType.c_str());
-
-			response = request->beginResponse(*m_fileSystem, path, contentType);
-			response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-			response->addHeader("Pragma", "no-cache");
-			response->addHeader("Expires", "0");
-
-			if (path.endsWith(".gz"))
-			{
-				response->addHeader("Content-Encoding", "gzip");
-			}
-
-			DEBUGLOG("File %s EXIST\r\n", path.c_str());
-			// Mark as found.
-			FileFoundL = true;
-			request->send(response);
-			// delete response; // Free up memory!
-			DEBUGLOG("File %s SENT\r\n", path.c_str());
-
-		}
-	}
-
-	// If it is not part of the RPOGMEM or FS.
-	//else
-	//{
-	//	DEBUGLOG("File %s MISSING\r\n", path.c_str());
-	//}
-
-	return FileFoundL;
 }
 
 /** @brief Create file.
@@ -1122,6 +1048,165 @@ void WEBServer::handleFileUpload(
 
 #endif // ENABLE_EDITOR
 
+/** @brief Read file.
+ *  @param path String, File path.
+ *  @param request AsyncWebServerRequest, Request object.
+ *  @return Void.
+ */
+bool WEBServer::handleFileRead(String path, AsyncWebServerRequest* request) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+
+	DEBUGLOG("File: %s\r\n", path.c_str());
+
+	bool FileFoundL = false;
+	AsyncWebServerResponse* response;
+
+	// Check PROGMEM for this file.
+#ifdef USE_PROGMEM_FS
+
+	bool PROGMEMFileL = false;
+
+	// HTML
+#ifdef _BZF_LOGIN_H
+	if (path == BZF_LOGIN_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_LOGIN_MT, bzf_login, BZF_LOGIN_SIZE);
+	}
+#endif // _BZF_LOGIN_H
+#ifdef _BZF_DASHBOARD_H
+	else if (path == BZF_DASHBOARD_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_DASHBOARD_MT, bzf_dashboard, BZF_DASHBOARD_SIZE);
+	}
+#endif //_BZF_DASHBOARD_H
+#ifdef _BZF_SETTINGS_H
+	else if (path == BZF_SETTINGS_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_SETTINGS_MT, bzf_settings, BZF_SETTINGS_SIZE);
+	}
+#endif // _BZF_SETTINGS_H
+#ifdef _BZF_NETWORK_H
+	else if (path == BZF_NETWORK_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_NETWORK_MT, bzf_network, BZF_NETWORK_SIZE);
+	}
+#endif // _BZF_NETWORK_H
+#ifdef _BZF_HELP_H
+	else if (path == BZF_HELP_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_HELP_MT, bzf_help, BZF_HELP_SIZE);
+	}
+#endif // _BZF_HELP_H
+#ifdef _BZF_MQTT_H
+	else if (path == BZF_MQTT_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_MQTT_MT, bzf_mqtt, BZF_MQTT_SIZE);
+	}
+#endif // _BZF_MQTT_H
+	// CSS
+	else if (path == BZF_RESET_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_RESET_MT, bzf_reset, BZF_RESET_SIZE);
+	}
+	else if (path == BZF_STYLE_MIN_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_STYLE_MIN_MT, bzf_style_min, BZF_STYLE_MIN_SIZE);
+	}
+	// JS
+	else if (path == BZF_MICROAJAX_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_MICROAJAX_MT, bzf_microajax, BZF_MICROAJAX_SIZE);
+	}
+	else if (path == BZF_DEV_STATUS_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_DEV_STATUS_MT, bzf_dev_status, BZF_DEV_STATUS_SIZE);
+	}
+	// Icon
+	else if (path == BZF_FAVICON_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_FAVICON_MT, bzf_favicon, BZF_FAVICON_SIZE);
+	}
+	// Logo
+	else if (path == BZF_LOGO_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_LOGO_MT, bzf_logo, BZF_LOGO_SIZE);
+	}
+
+#ifdef ENABLE_EDITOR
+	// Editor
+	else if (path == BZF_EDIT_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_EDIT_MT, bzf_edit, BZF_EDIT_SIZE);
+	}
+#endif
+
+	if (PROGMEMFileL)
+	{
+		FileFoundL = true;
+		response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		response->addHeader("Pragma", "no-cache");
+		response->addHeader("Expires", "0");
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
+	}
+
+#endif // USE_PROGMEM_FS
+
+	// Check SPIFFS for this file.
+	if (!FileFoundL)
+	{
+		String contentType = getContentType(path, request);
+		String pathWithGz = path + ".gz";
+		if (m_fileSystem->exists(pathWithGz) || m_fileSystem->exists(path))
+		{
+			if (m_fileSystem->exists(pathWithGz))
+			{
+				path += ".gz";
+			}
+
+			DEBUGLOG("Content type: %s\r\n", contentType.c_str());
+
+			response = request->beginResponse(*m_fileSystem, path, contentType);
+			response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+			response->addHeader("Pragma", "no-cache");
+			response->addHeader("Expires", "0");
+
+			if (path.endsWith(".gz"))
+			{
+				response->addHeader("Content-Encoding", "gzip");
+			}
+
+			DEBUGLOG("File %s EXIST\r\n", path.c_str());
+			// Mark as found.
+			FileFoundL = true;
+			request->send(response);
+			// delete response; // Free up memory!
+			DEBUGLOG("File %s SENT\r\n", path.c_str());
+
+		}
+	}
+
+	return FileFoundL;
+}
+
 /** @brief Settings arguments parser. Part of the API.
  *  @param request, AsyncWebServerRequest request object.
  *  @return Void.
@@ -1256,23 +1341,11 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 		Serial.flush();
 	}
 
-#ifdef USE_PROGMEM_FS
-	DEBUGLOG("1");
-	AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", bzf_settings, BZF_SETTINGS_SIZE);
-	response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-	response->addHeader("Pragma", "no-cache");
-	response->addHeader("Expires", "0");
-	response->addHeader("Content-Encoding", "gzip");
-	request->send(response);
-	DEBUGLOG("2");
-	return;
-#else
 	if (!this->handleFileRead("/settings.html", request))
 	{
 		request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		return;
 	}
-#endif // USE_PROGMEM_FS
 }
 
 /** @brief Network arguments parser. Part of the API.
@@ -1745,8 +1818,8 @@ void WEBServer::goToLogin(AsyncWebServerRequest* request) {
 	response->addHeader("Location", ROUT_PAGE_LOGIN);
 	response->addHeader("Cache-Control", "no-cache");
 	response->addHeader("Set-Cookie", "");
-	m_Cookie = genSession();
 	request->send(response);
+	m_Cookie = genSession();
 }
 
 /** @brief Clear keep alive counter.
@@ -1756,6 +1829,21 @@ void WEBServer::clearAliveTime()
 {
 	m_keepAliveTime = 0;
 }
+
+/** @brief Template processor.
+ *  @param var, const String& NAme of the template.
+ *  @return String, Template content.
+ */
+//String WEBServer::templateProcessor(const String& var)
+//{
+//	if (var == "DEVICE_BRAND")
+//	{
+//		DEBUGLOG("`DEVICE_BRAND\r\n");
+//		return String(DEVICE_BRAND);
+//	}
+//
+//	return String();
+//}
 
 /** @brief Execute every one second.
  *  @param arg, void Execution arguments.
