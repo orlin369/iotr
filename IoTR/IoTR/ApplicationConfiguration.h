@@ -72,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define USE_PROGMEM_FS
 
 /** @brief Enable rescue button. */
-//#define ENABLE_RESCUE_BTN
+#define ENABLE_RESCUE_BTN
 
 #ifndef ARDUINO_ESP8266_NODEMCU
 static const uint8_t D1 = 5;
@@ -185,6 +185,12 @@ static const uint8_t D3 = 0;
 #define DEFAULT_MQTT_PASS ""
 #define MQTT_HEARTBEAT_TIME 5000UL
 
+#define TOPIC_SER_OUT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/serial/out")).c_str()
+#define TOPIC_SER_IN String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/serial/in")).c_str()
+#define TOPIC_STAT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/status")).c_str()
+#define TOPIC_UPDATE String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/update")).c_str()
+#define TOPIC_UPDATE String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/ir")).c_str()
+
 #pragma endregion
 
 #pragma region HTTP Update Configuration
@@ -212,7 +218,7 @@ static const uint8_t D3 = 0;
 
 #ifdef ENABLE_DEVICE_CONTROL
 #define PIN_KILL_SW D3
-#define PIN_SW_ENABLE D2
+#define PIN_SW_ENABLE D1
 #endif // ENABLE_DEVICE_CONTROL
 
 #pragma endregion
@@ -263,11 +269,5 @@ https://hackster.imgix.net/uploads/attachments/669065/screen_shot_2018-11-27_at_
 */
 
 #endif // ENABLE_ROOMBA
-
-#define TOPIC_SER_OUT "roboleague/iotr/KerelV1/serial/out"
-#define TOPIC_SER_IN  "roboleague/iotr/KerelV1/serial/in"
-#define TOPIC_STAT    "roboleague/iotr/KerelV1/status"
-#define TOPIC_UPDATE  "roboleague/iotr/KerelV1/update"
-#define TOPIC_IR      "roboleague/iotr/KerelV1/ir"
 
 #endif // _APPLICATIONCONFIGURATION_h
