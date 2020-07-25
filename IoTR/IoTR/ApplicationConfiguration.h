@@ -189,7 +189,7 @@ static const uint8_t D3 = 0;
 #define TOPIC_SER_IN String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/serial/in")).c_str()
 #define TOPIC_STAT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/status")).c_str()
 #define TOPIC_UPDATE String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/update")).c_str()
-#define TOPIC_UPDATE String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/ir")).c_str()
+#define TOPIC_IR String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/ir")).c_str()
 
 #pragma endregion
 
