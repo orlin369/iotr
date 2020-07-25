@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-import sys
-import time
 import json
 from time import gmtime, strftime
 from datetime import datetime
@@ -67,6 +65,7 @@ __status__ = "Debug"
 #endregion
 
 class Device:
+    """Device monitor class."""
 
 #region Attributes
 
@@ -101,7 +100,7 @@ class Device:
         # Create settings file if necessary.
         if not os.path.exists(self.__settings_file):
             self.__create_default_settings()
-        
+
         # Load if it is there.
         else:
             self.__load_settings()
@@ -124,7 +123,13 @@ class Device:
 
     @property
     def id(self):
+        """Returns the ID of the device.
 
+        Returns
+        -------
+        str
+            Device ID.
+        """
         return self.__config["DEVICE"]["id"]
 
 #endregion
@@ -207,22 +212,22 @@ class Device:
     def __on_disconnect(self, client, userdata, rc):
         self.__logger.info("Disconnected with RC: {}".format(str(rc)))
 
+    def __on_subscribe(self, client, userdata, mid, granted_qos):
+        self.__logger.info("Subscribed to Topic: {} with QoS: {}".format(mid, str(granted_qos)))
+
     def __on_message(self, client, userdata, msg):
 
         message = msg.payload.decode("utf-8")
         content = {"topic": str(msg.topic), "payload": message, "qos": msg.qos}
         self.__logger.info(str(content))
-        
+
         if msg.topic == self.__create_topic("/status"):
             jmsg = json.loads(message)
             dt_object = datetime.fromtimestamp(jmsg["ts"])
             print(dt_object)
-            
+
         elif msg.topic == self.__create_topic("/serial/in"):
             print(message)
-
-    def __on_subscribe(self, client, userdata, mid, granted_qos):
-        self.__logger.info("Subscribed to Topic: {} with QoS: {}".format(mid, str(granted_qos)))
 
 
     def __crate_log_file(self, logs_dir_name="logs/"):
@@ -285,10 +290,10 @@ class Device:
 
         port = self.__config["MQTT"]["port"]
         port = int(port)
-        
+
         keepalive = self.__config["MQTT"]["alive"]
         keepalive = int(keepalive)
-        
+
         host = self.__config["MQTT"]["host"]
 
         # Connect with MQTT Broker
@@ -328,7 +333,7 @@ def interupt_handler(signum, frame):
 
     else:
         print("Signal handler called. Signal: {}; Frame: {}".format(signum, frame))
-    
+
     __time_to_stop = True
 
     for device in __devices:
@@ -362,7 +367,7 @@ def main():
         settings_path = os.path.join(base_path, dir_item)
         if settings_path.endswith(".ini"):
             print("Create device: {}".format(settings_path))
-            
+
             # Create device
             __devices.update({dir_item: Device(settings_path)})
 
