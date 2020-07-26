@@ -561,6 +561,15 @@ void onMqttMessage(
 		}
 	}
 
+	// Serial out.
+	if (tp == TOPIC_SER_OUT)
+	{
+		for (size_t idx = 0; idx < len; idx++)
+		{
+			Serial.print(payload[idx]);
+		}
+	}
+
 	DEBUGLOG("Publish received.\r\n");
 	DEBUGLOG("  topic: %s\r\n", topic);
 	DEBUGLOG("  qos: %d\r\n", properties.qos);
