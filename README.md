@@ -87,8 +87,10 @@ To use Visual Studio as development environment use this extension and do not fo
 
 **0. Automated way**
 
+Use CMD instead Power Shell
+
 ```sh
-cd %USERPORFILE%
+cd %USERPROFILE%
 ```
 ```sh
 cd Documents\Arduino\libraries
@@ -104,7 +106,7 @@ git clone https://github.com/crankyoldgit/IRremoteESP8266.git
 git clone https://github.com/adafruit/Adafruit_NeoPixel.git
 ```
 
-OOOOOOOOOR
+OOOOOOOOOR Manual way
 
 **1. Arduino JSON Library**
 
