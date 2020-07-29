@@ -85,6 +85,27 @@ To use Visual Studio as development environment use this extension and do not fo
 
 **All external libraries are placed: __C:/Users/(Your User Name)/Documents/Arduino/libraries__**
 
+**0. Automated way**
+
+```sh
+cd %USERPORFILE%
+```
+```sh
+cd Documents\Arduino\libraries
+```
+```sh
+git clone https://github.com/bblanchon/ArduinoJson.git 
+git clone https://github.com/arduino-libraries/NTPClient.git
+git clone https://github.com/me-no-dev/ESPAsyncTCP.git
+git clone https://github.com/me-no-dev/ESPAsyncWebServer.git
+git clone https://github.com/me-no-dev/AsyncTCP.git
+git clone https://github.com/marvinroger/async-mqtt-client.git
+git clone https://github.com/crankyoldgit/IRremoteESP8266.git
+git clone https://github.com/adafruit/Adafruit_NeoPixel.git
+```
+
+OOOOOOOOOR
+
 **1. Arduino JSON Library**
 
 - Description - CRUD operation of JSON string no the file system and network.
@@ -143,14 +164,6 @@ To use Visual Studio as development environment use this extension and do not fo
 - Installation - It can be add by Arduino library manager with specified library version.
 - Repository - [**here**](https://github.com/adafruit/Adafruit_NeoPixel)
 - License - [**LGPL-3.0**](https://github.com/adafruit/Adafruit_NeoPixel/blob/master/LICENSE)
-
-**9. OOOOR You can just use automated installation way**
-
- - Go to main folder of the repository
- - Call the automated installation shell script file.
- ```sh
- install_libs.sh
- ```
 
 ## **Schematics**
 
