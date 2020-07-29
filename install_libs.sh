@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd Documents/Arduino/librarys
+cd Documents/Arduino/libraries
 
 git clone https://github.com/bblanchon/ArduinoJson.git
 git clone https://github.com/arduino-libraries/NTPClient.git
