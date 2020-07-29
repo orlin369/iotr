@@ -144,6 +144,14 @@ To use Visual Studio as development environment use this extension and do not fo
 - Repository - [**here**](https://github.com/adafruit/Adafruit_NeoPixel)
 - License - [**LGPL-3.0**](https://github.com/adafruit/Adafruit_NeoPixel/blob/master/LICENSE)
 
+**9. OOOOR You can just use automated installation way**
+
+ - Go to main folder of the repository
+ - Call the automated installation shell script file.
+ ```sh
+ install_libs.sh
+ ```
+
 ## **Schematics**
 
 Coaming soon **:)**
