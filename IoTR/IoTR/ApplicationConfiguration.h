@@ -64,9 +64,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Enable device control. */
 #define ENABLE_DEVICE_CONTROL
 
-/** @brief Enable software ON and OFF. */
-//#define EANBLE_SOFTWARE_ONOFF
-
 //#define ENABLE_ROOMBA
 
 #define USE_PROGMEM_FS
@@ -190,6 +187,9 @@ static const uint8_t D3 = 0;
 #define TOPIC_STAT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/status")).c_str()
 #define TOPIC_UPDATE String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/update")).c_str()
 #define TOPIC_IR String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/ir")).c_str()
+#define TOPIC_RELAY_IN String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/relay/in")).c_str()
+#define TOPIC_RELAY_OUT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/relay/out")).c_str()
+#define TOPIC_BUTTON String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/button/out")).c_str()
 
 #pragma endregion
 
@@ -214,12 +214,10 @@ static const uint8_t D3 = 0;
 
 #pragma endregion
 
-#pragma region Command Module
+#pragma region Power IO
 
-#ifdef ENABLE_DEVICE_CONTROL
-#define PIN_KILL_SW D3
-#define PIN_SW_ENABLE D1
-#endif // ENABLE_DEVICE_CONTROL
+#define PIN_RELAY D2
+#define PIN_INPUT D1
 
 #pragma endregion
 
@@ -232,20 +230,10 @@ static const uint8_t D3 = 0;
 
 #pragma endregion
 
-#pragma region Self power Controll
-
-#ifdef EANBLE_SOFTWARE_ONOFF
-#define PIN_PON D4
-#endif // EANBLE_SOFTWARE_ONOFF
-
-#pragma endregion
-
 #pragma region Resque Button
 
 #ifdef ENABLE_RESCUE_BTN
-
 #define PIN_DEVICE_RESCUE D1
-
 #endif // ENABLE_RESCUE_BTN
 
 #pragma endregion

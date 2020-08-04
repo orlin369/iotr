@@ -43,8 +43,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Smart scale WEB server. */
 #include "WEBServer.h"
 
-#include "CommandModule.h"
-
 #include "FxTimer.h"
 
 #include "DeviceState.h"
@@ -174,10 +172,9 @@ void power_on() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#ifdef EANBLE_SOFTWARE_ONOFF
-	pinMode(PIN_PON, OUTPUT);
-	digitalWrite(PIN_PON, LOW);
-#endif // EANBLE_SOFTWARE_ONOFF
+	digitalWrite(PIN_RELAY, HIGH);
+	// Publish message.
+	MQTTClient_g.publish(TOPIC_RELAY_OUT, 2, true, "1");
 }
 
 void power_off() {
@@ -187,10 +184,9 @@ void power_off() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#ifdef EANBLE_SOFTWARE_ONOFF
-	pinMode(PIN_PON, OUTPUT);
-	digitalWrite(PIN_PON, LOW);
-#endif // EANBLE_SOFTWARE_ONOFF
+	digitalWrite(PIN_RELAY, LOW);
+	// Publish message.
+	MQTTClient_g.publish(TOPIC_RELAY_OUT, 2, true, "0");
 }
 
 #pragma endregion
@@ -369,8 +365,8 @@ void configure_web_server() {
 #endif // SHOW_FUNC_NAMES
 
 	LocalWEBServer.begin(&SPIFFS);
-	LocalWEBServer.setCbStopDevice(stop_device);
-	LocalWEBServer.setCbStartDevice(start_device);
+	LocalWEBServer.setCbStopDevice(power_off);
+	LocalWEBServer.setCbStartDevice(power_on);
 	LocalWEBServer.setCbReboot(reboot);
 }
 
@@ -487,13 +483,16 @@ void onMqttConnect(bool sessionPresent) {
 	DEBUGLOG("Connected to MQTT.\r\n");
 	DEBUGLOG("Session present: %d\r\n", sessionPresent);
 
-	// PacketIdSubL = MQTTClient_g.subscribe(TOPIC_SER_OUT, 2);
-	// DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
-
 	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_SER_OUT, 2);
 	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 
 	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_STAT, 2);
+	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
+
+	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_RELAY_IN, 2);
+	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
+
+	PacketIdSubL = MQTTClient_g.subscribe(TOPIC_UPDATE, 2);
 	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 }
 
@@ -548,12 +547,14 @@ void onMqttMessage(
 #endif // SHOW_FUNC_NAMES
 
 	String tp = String(topic);
+
+	// Update request.
 	if (tp == TOPIC_UPDATE)
 	{
 		if ((uint8_t)payload[0] != (uint8_t)ESP_FW_VERSION)
 		{
 			DEBUGLOG("Time to update.\r\n");
-			check_update_ESP();
+			//check_update_ESP();
 		}
 		else
 		{
@@ -567,6 +568,19 @@ void onMqttMessage(
 		for (size_t idx = 0; idx < len; idx++)
 		{
 			Serial.print(payload[idx]);
+		}
+	}
+
+	// Power control.
+	if (tp == TOPIC_RELAY_IN)
+	{
+		if (payload[0] == '0')
+		{
+			power_off();
+		}
+		if (payload[0] == '1')
+		{
+			power_on();
 		}
 	}
 
@@ -664,47 +678,6 @@ void read_device_serial()
 
 #pragma endregion
 
-#pragma region Command Module
-
-void configure_command_module() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.init(PIN_KILL_SW, PIN_SW_ENABLE);
-	CommandModule.setState(StateType::Restart);
-#endif // ENABLE_DEVICE_CONTROL
-}
-
-void stop_device() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.enable(false);
-#endif // ENABLE_DEVICE_CONTROL
-}
-
-void start_device() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.enable(true);
-#endif // ENABLE_DEVICE_CONTROL
-}
-
-#pragma endregion
-
 #ifdef ENABLE_ROOMBA
 
 void wakeUp(void) {
@@ -775,6 +748,9 @@ void setup()
 	//
 	Serial.begin(DeviceConfiguration.PortBaudrate);
 
+	// Setup the relay.
+	pinMode(PIN_RELAY, OUTPUT);
+
 #ifdef ENABLE_ROOMBA
 	wakeUp();
 	startSafe();
@@ -786,10 +762,7 @@ void setup()
 #endif // ENABLE_RESCUE_BTN
 
 	// Turn ON the self power latch.
-	power_on();
-
-	// Configure command module.
-	configure_command_module();
+	power_off();
 
 #ifdef ENABLE_STATUS_LED
 	// Setup the RGB led.
@@ -861,10 +834,6 @@ void loop()
 	update_recue_procedure();
 #endif // ENABLE_RESQUE_BTN
 
-#ifdef ENABLE_DEVICE_CONTROL
-	CommandModule.update();
-#endif // ENABLE_DEVICE_CONTROL
-
 	// 
 	LocalWEBServer.update();
 	DeviceStateTimer_g.update();
@@ -919,7 +888,7 @@ void loop()
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
 			DeviceStatus.Flags = 0; // TODO: Flags
 			DeviceStatus.FreeHeap = ESP.getFreeHeap();
-			
+
 			// part of the flags. - MQTTClient_g.connected();
 
 			if (MQTTClient_g.connected())
