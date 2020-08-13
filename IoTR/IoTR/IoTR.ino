@@ -650,13 +650,20 @@ void mqtt_reconnect()
  */
 void read_device_serial()
 {
-	static String IncommingCommnad = "";
+	static String JSONMsgL = "";
+	static String MessageL = "";
+	static unsigned long TSL = 0;
+	static unsigned long TS2L = 0;
 
-	// Fill the command data buffer with command.
-	while (Serial.available())
+	if (COM_PORT.available() < 1)
+	{
+		return;
+	}
+
+	while (COM_PORT.available() > 0)
 	{
 		// Add new char.
-		IncommingCommnad += (char)Serial.read();
+		MessageL += (char)COM_PORT.read();
 		// Wait a while for a a new char.
 		delay(5);
 		//ESP.wdtFeed();
@@ -664,14 +671,26 @@ void read_device_serial()
 	}
 
 	// If command if not empty parse it.
-	if (IncommingCommnad != "")
+	if (MessageL != "")
 	{
-		// Publish message.
-		MQTTClient_g.publish(TOPIC_SER_IN, 2, true, IncommingCommnad.c_str());
-	}
+		TSL = NTPClient_g.getEpochTime() * 1000;
+		TS2L = millis() % 999;
+		TSL += TS2L;
 
-	// Clear the command data buffer.
-	IncommingCommnad = "";
+		JSONMsgL += "{\"ts\":";
+		JSONMsgL += String(TSL);
+
+		JSONMsgL += ", \"msg\":\"";
+		JSONMsgL += MessageL;
+		JSONMsgL += "\"}";
+
+		// Publish message.
+		MQTTClient_g.publish(TOPIC_SER_IN, 2, true, JSONMsgL.c_str());
+
+		// Clear the command data buffer.
+		JSONMsgL = "";
+		MessageL = "";
+	}
 }
 
 #pragma endregion
@@ -704,8 +723,8 @@ void startSafe() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	Serial.write(128);  //Start
-	Serial.write(131);  //Safe mode
+	COM_PORT.write(128);  //Start
+	COM_PORT.write(131);  //Safe mode
 	delay(1000);
 }
 
@@ -719,11 +738,11 @@ void drive(int velocity, int radius) {
 	clamp(velocity, -500, 500); //def max and min velocity in mm/s
 	clamp(radius, -2000, 2000); //def max and min radius in mm
 
-	Serial.write(137);
-	Serial.write(velocity >> 8);
-	Serial.write(velocity);
-	Serial.write(radius >> 8);
-	Serial.write(radius);
+	COM_PORT.write(137);
+	COM_PORT.write(velocity >> 8);
+	COM_PORT.write(velocity);
+	COM_PORT.write(radius >> 8);
+	COM_PORT.write(radius);
 }
 
 void turnCW(unsigned short velocity, unsigned short degrees) {
@@ -746,7 +765,7 @@ void setup()
 	setup_debug_port();
 
 	//
-	Serial.begin(DeviceConfiguration.PortBaudrate);
+	COM_PORT.begin(DeviceConfiguration.PortBaudrate);
 
 	// Setup the relay.
 	pinMode(PIN_RELAY, OUTPUT);

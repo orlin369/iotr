@@ -79,7 +79,7 @@ static const uint8_t D3 = 0;
 
 #pragma endregion
 
-#pragma region Device Conguration
+#pragma region Device Configuration
 
 /** @brief Default STA SSID. */
 #define DEAFULT_USER "admin"
@@ -89,6 +89,9 @@ static const uint8_t D3 = 0;
 
 /** @brief Default device baud rate. */
 #define DEFAULT_BAUDRATE 9600
+
+/** @brief Serial port. */
+#define COM_PORT Serial
 
 #pragma endregion
 
