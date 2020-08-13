@@ -1,70 +1,25 @@
 
-# Created by https://www.gitignore.io/api/c,c++,visualstudio
-# Edit at https://www.gitignore.io/?templates=c,c++,visualstudio
+# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio,c++
+# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,visualstudio,c++
 
-### C ###
+### C++ ###
 # Prerequisites
 *.d
 
-# Object files
+# Compiled Object files
+*.slo
+*.lo
 *.o
-*.ko
 *.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
 
 # Precompiled Headers
 *.gch
 *.pch
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-### C++ ###
-# Prerequisites
-
-# Compiled Object files
-*.slo
-
-# Precompiled Headers
-
 # Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
 
 # Fortran module files
 *.mod
@@ -72,8 +27,26 @@ dkms.conf
 
 # Compiled Static libraries
 *.lai
+*.la
+*.a
+*.lib
 
 # Executables
+*.exe
+*.out
+*.app
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -107,6 +80,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+[Ll]ogs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -145,7 +119,10 @@ StyleCopReport.xml
 *_i.c
 *_p.c
 *_h.h
+*.ilk
+*.meta
 *.iobj
+*.pdb
 *.ipdb
 *.pgc
 *.pgd
@@ -199,9 +176,6 @@ _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
 
-# JustCode is a .NET coding add-in
-.JustCode
-
 # TeamCity is a build add-in
 _TeamCity*
 
@@ -211,6 +185,9 @@ _TeamCity*
 # AxoCover is a Code Coverage Tool
 .axoCover/*
 !.axoCover/settings.json
+
+# Coverlet is a free, cross platform Code Coverage Tool
+coverage*[.json, .xml, .info]
 
 # Visual Studio code coverage results
 *.coverage
@@ -421,4 +398,7 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# End of https://www.gitignore.io/api/c,c++,visualstudio
+# Ionide (cross platform F# VS Code tools) working folder
+.ionide/
+
+# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio,c++
