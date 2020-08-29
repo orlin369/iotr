@@ -98,6 +98,8 @@ decode_results IRResults_g;
 
 #endif // ENABLE_IR_INTERFACE
 
+char TimestampBuff_g[18];
+
 #pragma endregion
 
 #pragma region Prototypes
@@ -652,8 +654,7 @@ void read_device_serial()
 {
 	static String JSONMsgL = "";
 	static String MessageL = "";
-	static unsigned long TSL = 0;
-	static unsigned long TS2L = 0;
+	static unsigned long long TSL = 0;
 
 	if (COM_PORT.available() < 1)
 	{
@@ -673,13 +674,21 @@ void read_device_serial()
 	// If command if not empty parse it.
 	if (MessageL != "")
 	{
-		TSL = NTPClient_g.getEpochTime() * 1000;
-		TS2L = millis() % 999;
-		TSL += TS2L;
+		// Get epoch time.
+		TSL = (unsigned long long)NTPClient_g.getEpochTime();
 
+		// Add miliseconds
+		TSL *= 1000ULL;
+
+		// Add the miliseconds part.
+		TSL += (unsigned long long)(millis() % 999UL);
+
+		// Print it to the buffer.
+		sprintf(TimestampBuff_g, "%llu", TSL);
+
+		// Form the JSON message.
 		JSONMsgL += "{\"ts\":";
-		JSONMsgL += String(TSL);
-
+		JSONMsgL += String(TimestampBuff_g);
 		JSONMsgL += ", \"msg\":\"";
 		JSONMsgL += MessageL;
 		JSONMsgL += "\"}";
