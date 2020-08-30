@@ -666,7 +666,7 @@ void read_device_serial()
 		// Add new char.
 		MessageL += (char)COM_PORT.read();
 		// Wait a while for a a new char.
-		delay(5);
+		delay(1);
 		//ESP.wdtFeed();
 		yield();
 	}
@@ -681,7 +681,7 @@ void read_device_serial()
 		TSL *= 1000ULL;
 
 		// Add the miliseconds part.
-		TSL += (unsigned long long)(millis() % 999UL);
+		TSL += (unsigned long long)(millis() % 999ULL);
 
 		// Print it to the buffer.
 		sprintf(TimestampBuff_g, "%llu", TSL);
