@@ -271,7 +271,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Add arguments.
-    parser.add_argument("--path", type=str, default=".\\..\\IoTR\\IoTR\\data", help="Path to the target files.")
+    parser.add_argument("--path", type=str, default=".\\..\\IoTR\\data", help="Path to the target files.")
 
     # Take arguments.
     args = parser.parse_args()
