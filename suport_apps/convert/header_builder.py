@@ -167,7 +167,7 @@ class HeaderBuilder:
 
         # Generate output file name.
         out_file_name = self.__generate_name(self.__base_path, dir_item)
-        dst_file_path = os.path.join(self.__base_path, "..\\src2\\", out_file_name)
+        dst_file_path = os.path.join(self.__base_path, "..\\src\\", out_file_name)
 
         # Header name
         self.__output_file.write_header(out_file_name)
