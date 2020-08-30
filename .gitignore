@@ -426,6 +426,6 @@ MigrationBackup/
 
 ### Logs
 ### Ignore logs.
-logs/
+logs
 
 # End of https://www.gitignore.io/api/c,c++,visualstudio
