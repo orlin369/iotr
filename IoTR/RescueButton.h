@@ -9,6 +9,13 @@
 	#include "WProgram.h"
 #endif
 
+#ifdef ESP32
+#include <SPIFFS.h>
+
+#elif defined(ESP8266)
+
+#endif
+
 #include "ApplicationConfiguration.h"
 #include "DebugPort.h"
 #include "FxTimer.h"

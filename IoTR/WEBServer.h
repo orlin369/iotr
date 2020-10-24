@@ -69,20 +69,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Headers
 
+#include "ApplicationConfiguration.h"
+
+#ifdef ESP32
+#include <ESPmDNS.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include <SPIFFS.h>
+#include <Hash.h>
+#include <AsyncTCP.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiClient.h>
-#include <FS.h>
-
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-
-#include <Ticker.h>
-#include <ArduinoJson.h>
 #include <Hash.h>
+#include <ESPAsyncTCP.h>
+#endif
 
-/* Application configuration. */
-#include "ApplicationConfiguration.h"
+#include <FS.h>
+#include <Ticker.h>
+
+#include <ArduinoJson.h>
+#include <ESPAsyncWebServer.h>
 
 #include "NetworkConfiguration.h"
 
@@ -119,10 +127,10 @@ public:
 #pragma region Methods
 
 	/** @brief Constructor.
-	 *  @param port, uint16 WEB server port.
+	 *  @param port, uint16_t WEB server port.
 	 *  @return WEBServer
 	 */
-	WEBServer(uint16 port);
+	WEBServer(uint16_t port);
 
 	/** @brief Begin server.
 	 *  @param fs, FS file system.
@@ -227,12 +235,12 @@ protected:
 	 *  @param request AsyncWebServerRequest, Request object.
 	 *  @param filename String, Name of the file.
 	 *  @param index size_t,
-	 *  @param data uint8, Content of the file.
+	 *  @param data uint8_t, Content of the file.
 	 *  @param len size_t, Length of the file.
 	 *  @param final boolean, Flag for closing multi part file operation.
 	 *  @return Void.
 	 */
-	void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8 *data, size_t len, bool final);
+	void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 
 #endif // ENABLE_EDITOR
 

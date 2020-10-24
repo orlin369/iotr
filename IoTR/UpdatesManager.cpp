@@ -61,8 +61,13 @@ void check_update_ESP() {
 		{
 			DEBUGLOG("Preparing to update\r\n");
 			DEBUGLOG("Binary file URL : %s\r\n", BinariImageUrlL.c_str());
+#ifdef ESP32
 
-			t_httpUpdate_return ResponseL = ESPhttpUpdate.update(BinariImageUrlL, String(ESP_FW_VERSION));			
+	// TODO: Do somethin you idiot.
+
+#elif defined(ESP8266)
+			t_httpUpdate_return ResponseL = ESPhttpUpdate.update(BinariImageUrlL, String(ESP_FW_VERSION));
+
 			switch (ResponseL)
 			{
 				case HTTP_UPDATE_FAILED:
@@ -77,8 +82,10 @@ void check_update_ESP() {
 					DEBUGLOG("HTTP_UPDATE_OK\r\n");
 					break;
 			}
+#endif
 		}
-		else {
+		else
+		{
 			DEBUGLOG("Already on latest version.\r\n");
 		}
 	}

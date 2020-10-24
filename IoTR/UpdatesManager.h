@@ -60,10 +60,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VERSION_SERVER_PATH_ESP "api/v1/device/fota/esp/version/fw.txt" // api/v1/device/fota/esp/version
 #endif // !VERSION_SERVER_PATH_ESP
 
+#ifdef ESP32
+#include <WiFi.h>
+#include <WiFiMulti.h>
+#include <HTTPClient.h>
+#include <HTTPUpdate.h>
+
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
+#endif
 
 #pragma endregion
 

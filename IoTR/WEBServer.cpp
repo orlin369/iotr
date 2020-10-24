@@ -42,10 +42,10 @@ WEBServer LocalWEBServer(WEB_SERVER_PORT);
 #pragma region Public Methods
 
 /** @brief Constructor.
- *  @param port, uint16 WEB server port.
+ *  @param port, uint16_t WEB server port.
  *  @return WEBServer
  */
-WEBServer::WEBServer(uint16 port) : AsyncWebServer(port) {}
+WEBServer::WEBServer(uint16_t port) : AsyncWebServer(port) {}
 
 /** @brief Begin server.
  *  @param fs, FS file system.
@@ -90,11 +90,15 @@ void WEBServer::begin(FS* fs) {
  */
 void WEBServer::update()
 {
+#ifdef ESP32
+
+#elif defined(ESP8266)
 	// Update MDNS service.
 	if (WiFi.status() == WL_CONNECTED)
-	{
+	{	
 		MDNS.update();
 	}
+#endif
 }
 
 void WEBServer::displayLog(String line) {
@@ -311,7 +315,7 @@ void WEBServer::initRouts() {
 
 			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 		},
-		[this](AsyncWebServerRequest *request, String filename, size_t index, uint8 *data, size_t len, bool final)
+		[this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 		{
 			if (!this->isLoggedin(request))
 			{
@@ -721,7 +725,7 @@ void WEBServer::initRouts() {
 
 			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 		},
-		[this](AsyncWebServerRequest* request, String filename, size_t index, uint8* data, size_t len, bool final)
+		[this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 		{
 			if (!request->authenticate(DeviceConfiguration.Username.c_str(), DeviceConfiguration.Password.c_str()))
 			{
@@ -829,6 +833,78 @@ void WEBServer::initRouts() {
 
 // https://github.com/gmag11/FSBrowserNG
 
+#ifdef ESP32
+// ESP32
+
+/** @brief Handle file list.
+ *  @param request AsyncWebServerRequest, Request object.
+ *  @return Void.
+ */
+void WEBServer::handleFileList(AsyncWebServerRequest *request) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	if (!this->isLoggedin(request))
+	{
+		this->goToLogin(request);
+		return;
+	}
+
+	if (!request->hasArg("dir"))
+	{
+		request->send(500, MIME_TYPE_PLAIN_TEXT, "BAD ARGS");
+		return;
+	}
+
+	String path = request->arg("dir");
+	DEBUGLOG("List Directory: %s\r\n", path.c_str());
+
+	File root = SPIFFS.open(path);
+	File file = root.openNextFile();
+	String output = "[";
+
+	while(file)
+	{
+		String filename = String(file.name()).substring(1);
+		bool show = true;
+
+#ifndef SHOW_CONFIG
+		// Do not show secrets
+		String entry_name = "/" + filename;
+		show &= ((entry_name != CONFIG_DEVICE));
+		show &= ((entry_name != CONFIG_MQTT));
+		show &= ((entry_name != CONFIG_NET));
+#endif // SHOW_CONFIG
+
+		if(show)
+		{
+			if (output != "[")
+			{
+				output += ",";
+			}
+			bool isDir = false;
+			output += "{\"type\":\"";
+			output += (isDir) ? "dir" : "file";
+			output += "\",\"name\":\"";
+			output += filename;
+			output += "\"}";
+		}
+
+		DEBUGLOG("File: %s, size: %s\r\n", file.name(), formatBytes(file.size()).c_str()); 
+		file = root.openNextFile();
+	}
+
+	output += "]";
+	DEBUGLOG("%s\r\n", output.c_str());
+	request->send(200, "text/json", output);
+}
+
+#elif defined(ESP8266)
+// ESP8266
+
 /** @brief Handle file list.
  *  @param request AsyncWebServerRequest, Request object.
  *  @return Void.
@@ -858,7 +934,8 @@ void WEBServer::handleFileList(AsyncWebServerRequest *request) {
 	path = String();
 
 	String output = "[";
-	while (dir.next()) {
+	while (dir.next())
+	{
 		File entry = dir.openFile("r");
 
 		String filename = String(entry.name()).substring(1);
@@ -892,6 +969,10 @@ void WEBServer::handleFileList(AsyncWebServerRequest *request) {
 	DEBUGLOG("%s\r\n", output.c_str());
 	request->send(200, "text/json", output);
 }
+
+
+#endif
+
 
 /** @brief Create file.
  *  @param request AsyncWebServerRequest, Request object.
@@ -984,7 +1065,7 @@ void WEBServer::handleFileDelete(AsyncWebServerRequest *request) {
  *  @param request AsyncWebServerRequest, Request object.
  *  @param filename String, Name of the file.
  *  @param index size_t, 
- *  @param data uint8, Content of the file.
+ *  @param data uint8_t, Content of the file.
  *  @param len size_t, Length of the file.
  *  @param final boolean, Flag for closing multipart file operation.
  *  @return Void.
@@ -993,7 +1074,7 @@ void WEBServer::handleFileUpload(
 	AsyncWebServerRequest *request, 
 	String filename, 
 	size_t index, 
-	uint8 *data, 
+	uint8_t *data, 
 	size_t len, 
 	bool final) {
 #ifdef SHOW_FUNC_NAMES
@@ -1223,7 +1304,7 @@ void WEBServer::pageSendLogin(AsyncWebServerRequest* request) {
 		String user;
 		String pass;
 
-		for (uint8 index = 0; index < request->args(); index++)
+		for (uint8_t index = 0; index < request->args(); index++)
 		{
 			//DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
@@ -1275,7 +1356,7 @@ void WEBServer::pageSendSettings(AsyncWebServerRequest* request) {
 
 	if (request->args() > 0)  // Save Settings
 	{
-		for (uint8 index = 0; index < request->args(); index++)
+		for (uint8_t index = 0; index < request->args(); index++)
 		{
 			DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
@@ -1361,7 +1442,7 @@ void WEBServer::pageSendNetwork(AsyncWebServerRequest* request) {
 
 	if (request->args() > 0)  // Save Settings
 	{
-		for (uint8 index = 0; index < request->args(); index++)
+		for (uint8_t index = 0; index < request->args(); index++)
 		{
 			DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
@@ -1527,7 +1608,7 @@ void WEBServer::pageSendMqtt(AsyncWebServerRequest* request) {
 
 	if (request->args() > 0)  // Save Settings
 	{
-		for (uint8 index = 0; index < request->args(); index++)
+		for (uint8_t index = 0; index < request->args(); index++)
 		{
 			DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
 
@@ -1736,7 +1817,13 @@ void WEBServer::apiSendScannedNetworks(AsyncWebServerRequest* request) {
 			json += ",\"bssid\":\"" + WiFi.BSSIDstr(index) + "\"";
 			json += ",\"channel\":" + String(WiFi.channel(index));
 			json += ",\"secure\":" + String(WiFi.encryptionType(index));
+#ifdef ESP32
+// ESP32
+			json += ",\"hidden\":false";
+#elif defined(ESP8266)
+// ESP8266
 			json += ",\"hidden\":" + String(WiFi.isHidden(index) ? "true" : "false");
+#endif
 			json += "}";
 		}
 		WiFi.scanDelete();

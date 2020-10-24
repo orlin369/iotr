@@ -36,7 +36,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Headers
 
+#ifdef ESP32
+#include <WiFi.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESP8266mDNS.h>
+#endif
+
+#include "ApplicationConfiguration.h"
 
 #pragma endregion
 
@@ -45,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Get MAC address.
  *  @return String, Returns the string of MAC address.
  */
-String mac2str(const uint8 * mac);
+String mac2str(const uint8_t * mac);
 
 /** @brief Convert a single hex digit character to its integer value. Based on https://code.google.com/p/avr-netino/
  *  @return String, Returns the string of unified URL string.
@@ -58,7 +66,7 @@ unsigned char hex2dec(char c);
  *  @param char * output, Output result.
  *  @return boolean, Returns the true if value is in the range.
  */
-void bin_to_strhex(uint8 *input, unsigned int input_size, uint8 *output);
+void bin_to_strhex(uint8_t *input, unsigned int input_size, uint8_t *output);
 
 /** @brief Check the Values is between: [0 - 255].
  *  @param value String, Value of the octet.

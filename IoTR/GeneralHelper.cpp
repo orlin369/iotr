@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Get MAC address.
  *  @return String, Returns the string of MAC address.
  */
-String mac2str(const uint8 * mac) {
+String mac2str(const uint8_t * mac) {
 
 	char MACStrL[WL_MAC_ADDR_LENGTH * 3] = { 0 };
 
@@ -55,12 +55,12 @@ unsigned char hex2dec(char c) {
 }
 
 /** @brief Converts binary array to heximal string.
- *  @param uint8 * input, Binary input.
+ *  @param uint8_t * input, Binary input.
  *  @param unsigned int input_size, Binary input size.
  *  @param char * output, Output result.
  *  @return boolean, Returns the true if value is in the range.
  */
-void bin_to_strhex(uint8 *input, unsigned int input_size, uint8 *output)
+void bin_to_strhex(uint8_t *input, unsigned int input_size, uint8_t *output)
 {
 	for (unsigned int index = 0; index < input_size; index++)
 	{

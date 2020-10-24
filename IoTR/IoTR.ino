@@ -25,10 +25,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ApplicationConfiguration.h"
 
 // SDK
+#ifdef ESP32
+#include <ESPmDNS.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <SPIFFS.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
+#include <ESPAsyncTCP.h>
+#include <ESP8266mDNS.h>
+#endif
 
-#include <WiFiClient.h>
+// #include <WiFiClient.h>
 #include <FS.h>
 
 #include <AsyncMqttClient.h>
@@ -110,6 +118,14 @@ char TimestampBuff_g[18];
  */
 void configure_file_system();
 
+// AP functions
+#ifdef ESP32
+// ESP32
+
+
+#elif defined(ESP8266)
+// ESP8266
+
 /** @brief Configure WiFi module to access point.
  *  @return Void.
  */
@@ -126,6 +142,8 @@ void handler_ap_mode_station_connected(const WiFiEventSoftAPModeStationConnected
  *  @return Void.
  */
 void handler_ap_mode_station_disconnected(const WiFiEventSoftAPModeStationDisconnected& evt);
+
+#endif
 
 /** @brief Configure WiFi module to station.
  *  @return Void.
@@ -155,6 +173,17 @@ void show_device_properties() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+#ifdef ESP32
+// ESP32
+	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
+	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
+	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
+	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
+	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
+	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
+
+#elif defined(ESP8266)
+// ESP8266
 	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
 	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
 	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
@@ -162,6 +191,8 @@ void show_device_properties() {
 	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
 	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
 	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
+#endif
+
 	DEBUGLOG("\r\n");
 }
 
@@ -211,18 +242,40 @@ void configure_file_system() {
 		DEBUGLOG("Can not load file system.\r\n");
 
 		for (;;) {
+#ifdef ESP32
+// ESP32
+
+#elif defined(ESP8266)
+// ESP8266
 			ESP.wdtFeed();
+#endif
 		}
 	}
 
 #ifdef DEBUGLOG
+#ifdef ESP32
+// ESP32
+	File root = SPIFFS.open("/");
+	File file = root.openNextFile();
+	while(file)
+	{
+		DEBUGLOG("File: %s, size: %s\r\n", file.name(), formatBytes(file.size()).c_str()); 
+		file = root.openNextFile();
+	}
+
+#elif defined(ESP8266)
+// ESP8266
 	// List files
 	Dir dir = SPIFFS.openDir("/");
-	while (dir.next()) {
+	while (dir.next())
+	{
 		String fileName = dir.fileName();
 		size_t fileSize = dir.fileSize();
 		DEBUGLOG("File: %s, size: %s\r\n", fileName.c_str(), formatBytes(fileSize).c_str());
 	}
+
+#endif
+
 	DEBUGLOG("\r\n");
 #endif // DEBUGLOG
 }
@@ -230,6 +283,47 @@ void configure_file_system() {
 #pragma endregion
 
 #pragma region AP mode
+
+#ifdef ESP32
+// ESP32
+
+void configure_to_ap() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+	// Set the host name.
+	// WiFi.hostname(NetworkConfiguration.Hostname.c_str());
+
+	// Set the mode.
+	WiFi.mode(WIFI_AP);
+
+	uint32_t chipId = 0;
+	for(int i=0; i<17; i=i+8)
+	{
+		chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+	}
+
+	// NOTE: See description, this can be used as unique identification of the device.
+	AccessPointConfiguration.SSID = String(DEVICE_BRAND) + String(" - ") + String(chipId);
+
+	// Create AP name.
+	DEBUGLOG("AP Name: %s\r\n", AccessPointConfiguration.SSID.c_str());
+
+	if (AccessPointConfiguration.Enable) {
+		WiFi.softAP(AccessPointConfiguration.SSID.c_str(), AccessPointConfiguration.Password.c_str());
+		DEBUGLOG("AP Pass enabled: %s\r\n", AccessPointConfiguration.Password.c_str());
+	}
+	else {
+		WiFi.softAP(AccessPointConfiguration.SSID.c_str());
+		DEBUGLOG("AP Pass disabled.\r\n");
+	}
+}
+
+#elif defined(ESP8266)
+// ESP8266
 
 /** @brief Configure WiFi module to access point.
  *  @return Void.
@@ -259,11 +353,13 @@ void configure_to_ap() {
 	// Create AP name.
 	DEBUGLOG("AP Name: %s\r\n", AccessPointConfiguration.SSID.c_str());
 
-	if (AccessPointConfiguration.Enable) {
+	if (AccessPointConfiguration.Enable)
+	{
 		WiFi.softAP(AccessPointConfiguration.SSID.c_str(), AccessPointConfiguration.Password.c_str());
 		DEBUGLOG("AP Pass enabled: %s\r\n", AccessPointConfiguration.Password.c_str());
 	}
-	else {
+	else
+	{
 		WiFi.softAP(AccessPointConfiguration.SSID.c_str());
 		DEBUGLOG("AP Pass disabled.\r\n");
 	}
@@ -297,6 +393,8 @@ void handler_ap_mode_station_disconnected(const WiFiEventSoftAPModeStationDiscon
 	DEBUGLOG("Station disconnected: %s\r\n", mac2str(evt.mac).c_str());
 }
 
+#endif
+
 #pragma endregion
 
 #pragma region STA mode
@@ -312,7 +410,14 @@ void configure_to_sta() {
 #endif // SHOW_FUNC_NAMES
 
 	// Set the host name.
+#ifdef ESP32
+// ESP32
+
+#elif defined(ESP8266)
+// ESP8266
+	// Set the host name.
 	WiFi.hostname(NetworkConfiguration.Hostname.c_str());
+#endif
 
 	// Disconnect required here,
 	// improves reconnect reliability.
@@ -345,7 +450,13 @@ void configure_to_sta() {
 			return;
 		}
 		delay(500);
+#ifdef ESP32
+// ESP32
+
+#elif defined(ESP8266)
+// ESP8266
 		ESP.wdtFeed();
+#endif
 	}
 
 	DEBUGLOG("Connected:  %s\r\n", NetworkConfiguration.SSID.c_str());
