@@ -61,9 +61,29 @@ void check_update_ESP() {
 		{
 			DEBUGLOG("Preparing to update\r\n");
 			DEBUGLOG("Binary file URL : %s\r\n", BinariImageUrlL.c_str());
+
 #ifdef ESP32
 
-	// TODO: Do somethin you idiot.
+		    WiFiClient client;
+
+			t_httpUpdate_return ret = httpUpdate.update(client, BinariImageUrlL.c_str());
+			// Or:
+			//t_httpUpdate_return ret = httpUpdate.update(client, "server", 80, "file.bin");
+
+			switch (ret)
+			{
+				case HTTP_UPDATE_FAILED:
+					DEBUGLOG("HTTP_UPDATE_FAILED Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+					break;
+
+				case HTTP_UPDATE_NO_UPDATES:
+					DEBUGLOG("HTTP_UPDATE_NO_UPDATES");
+					break;
+
+				case HTTP_UPDATE_OK:
+					DEBUGLOG("HTTP_UPDATE_OK");
+					break;
+			}
 
 #elif defined(ESP8266)
 			t_httpUpdate_return ResponseL = ESPhttpUpdate.update(BinariImageUrlL, String(ESP_FW_VERSION));

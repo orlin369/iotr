@@ -19,17 +19,17 @@ Permissions of this strong copyleft license are conditioned on making available 
 
 ## **Brief**
 
-- The complexity of the project is requires to have keelage in the field of: Arduino IDE, Adding external libraries to arduino environment, Visual Studio, ESP8266 Arduino SDK, Git. 
-- This project is related to **IoTR - Robot Monitoring Device System**. The content of the repository is tha source code of **ESP8266 (WeMos-R1/2) MCU** on the board.
-- IDE that is used to create this project is **Arduino IDE**, the code is written in **Visual Studio 2019** with **vMicro** extension to work with **Arduino SDK** and **ESP8266 SDK**.
+- The complexity of the project is requires to have keelage in the field of: Arduino IDE, Adding external libraries to arduino environment, VSCode, ESP8266/ESP32 Arduino SDK, Git.
+- This project is related to **IoTR - Robot Monitoring Device System**. The content of the repository is the source code of **ESP8266/32** on the board.
+- IDE that is used to create this project is **Arduino IDE**, the code is written in **VSCode** with **Arduino** extension to work with **Arduino SDK** and **ESP8266/32 SDK**.
 - The project is create in **Windows 10** environment.
 
 ## **References**
 
  - [What is Arduino](https://www.arduino.cc/en/Main/Software)
  - [What is ESP8266](https://en.wikipedia.org/wiki/ESP8266)
- - [What is Visual Studio](https://visualstudio.microsoft.com/)
- - [What is vMicro](https://www.visualmicro.com/)
+ - [What is VSCode](https://code.visualstudio.com/)
+ - [What is Arduino Extension](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
  
 ## **Environment**
 
@@ -42,7 +42,7 @@ First we download and install the Arduino IDE.
 - Link - [**here**](https://www.arduino.cc/en/Main/Software)
 - Version - 1.8.12 or greater
 
-**2. ESP8266 SDK**
+**2.1 ESP8266 SDK**
 
 After the Arduino IDE is installed, it is time to add the ESP8266 SDK. Use link below to read the details.
 
@@ -59,19 +59,19 @@ This Arduino IDE extension will help to upload files to SPIFFS via Serial port t
 - Version - 0.5.0
 - License - [**GPL-2.0**](https://github.com/esp8266/arduino-esp8266fs-plugin/blob/master/LICENSE.txt)
 
-**4. Visual Studio**
+**4. VSCode**
 
-If we want to use better editor we recommend to proceed on this step, download and install Visual Studio.
+If we want to use better editor we recommend to proceed on this step, download and install VSCode.
 
-- Link - [**here**](https://visualstudio.microsoft.com/downloads/)
-- Version - 2019
+- Link - [**here**](https://code.visualstudio.com/download)
+- Version - 1.50
 
-**5. vMicro**
+**5. Arduino Extension for VSCode**
 
-To use Visual Studio as development environment use this extension and do not forget to stop Visual Studio before installation.
+To use VScode as development environment use this extension and do not forget to reload VSCode after installation.
 
-- Link - [**here**](https://www.visualmicro.com/page/User-Guide.aspx?doc=Visual-Micro-Menu.html)
-- Version - [**here**](https://www.visualmicro.com/page/Visual-Micro-Product-Version-History-Fixes-and-Additions.aspx)
+- Link - [**here**](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
+- Version - **0.3.2**
 
 **6. It is also possible from "/sport_apps" to use upload.py to upload the files from "/data".**
 
