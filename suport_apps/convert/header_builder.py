@@ -154,6 +154,7 @@ class HeaderBuilder:
 
         return text.replace(".h", "")
 
+
 #endregion
 
     def build(self, dir_item):
@@ -216,6 +217,7 @@ class HeaderBuilder:
 
         # Put it to file.
         self.__output_file.to_file(dst_file_path)
+        self.__output_file.clear()
 
         # Generate Include lines
         print(self.__generate_include_line(out_file_name))
