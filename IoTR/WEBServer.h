@@ -103,19 +103,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "GeneralHelper.h"
 
 #ifdef USE_PROGMEM_FS
-#include "src/bzf_dashboard.h"
-#include "src/bzf_dev_status.h"
-#include "src/bzf_edit.h"
-#include "src/bzf_favicon.h"
-#include "src/bzf_help.h"
-#include "src/bzf_login.h"
-#include "src/bzf_logo.h"
-#include "src/bzf_microajax.h"
-#include "src/bzf_mqtt.h"
-#include "src/bzf_network.h"
-#include "src/bzf_reset.h"
-#include "src/bzf_settings.h"
-#include "src/bzf_style.min.h"
+#include "src\bzf_dashboard.h"
+#include "src\bzf_dev_status.h"
+#include "src\bzf_edit.h"
+#include "src\bzf_favicon.h"
+#include "src\bzf_help.h"
+#include "src\bzf_login.h"
+#include "src\bzf_logo_white.h"
+#include "src\bzf_logo.h"
+#include "src\bzf_microajax.h"
+#include "src\bzf_mqtt.h"
+#include "src\bzf_network.h"
+#include "src\bzf_reset.h"
+#include "src\bzf_settings.h"
+#include "src\bzf_style.h"
 #endif // USE_PROGMEM_FS
 
 #pragma endregion

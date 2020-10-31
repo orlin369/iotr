@@ -6,26 +6,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>IoTR - SETTINGS</title>
         <link href="reset.css" rel="stylesheet" type="text/css">
-        <link href="style.min.css" rel="stylesheet" type="text/css">
+        <link href="style.css" rel="stylesheet" type="text/css">
         <style>
            
             /* CONTAINERS */
             
-            .container {
-                max-width: 430px;
-                margin: 50px auto 0 auto;
-            }
-            
             .f-container {
                 margin: 0 15px;
             }
+			
             /* FORM DEMO */
             
             .f-wall {
                 width: 100%;
                 height: 12px;
                 position: relative;
-                border: 4px dashed #ff0000;
+                border: 4px dashed #faa322;
                 border-left: none;
                 border-right: none;
             }
@@ -37,7 +33,7 @@
                 content: '';
                 display: block;
                 position: absolute;
-                border-bottom: 4px dashed #ff0000;
+                border-bottom: 4px dashed #faa322;
             }
             
             .f-wall.f-active,
@@ -49,7 +45,7 @@
             .f-circle {
                 width: 75%;
                 padding-bottom: 75%;
-                background-color: #000;
+                background-color: #2b3990;
                 position: relative;
                 margin: 15px auto;
                 border-radius: 50%;
@@ -64,11 +60,11 @@
                 border-radius: 50%;
                 position: absolute;
                 transform: rotate(45deg);
-                border: 5px solid transparent;
+                border: 10px solid transparent;
             }
             
             .f-left-bumper {
-                border-left-color: #ff0000;
+                border-left-color: #faa322;
             }
             
             .f-left-bumper.f-active {
@@ -76,7 +72,7 @@
             }
             
             .f-right-bumper {
-                border-top-color: #ff0000;
+                border-top-color: #faa322;
             }
             
             .f-right-bumper.f-active {
@@ -89,7 +85,7 @@
                 right: 63%;
                 bottom: 87%;
                 position: absolute;
-                background-color: #ff0000;
+                background-color: #faa322;
             }
             
             .f-cliff-front-left.f-active {
@@ -102,7 +98,7 @@
                 right: 30%;
                 bottom: 87%;
                 position: absolute;
-                background-color: #ff0000;
+                background-color: #faa322;
             }
             
             .f-cliff-front-right.f-active {
@@ -115,7 +111,7 @@
                 right: 79%;
                 bottom: 72%;
                 position: absolute;
-                background-color: #ff0000;
+                background-color: #faa322;
             }
             
             .f-cliff-left.f-active {
@@ -128,7 +124,7 @@
                 right: 14%;
                 bottom: 72%;
                 position: absolute;
-                background-color: #ff0000;
+                background-color: #faa322;
             }
             
             .f-cliff-right.f-active {
@@ -141,8 +137,8 @@
                 right: 77%;
                 bottom: 38%;
                 position: absolute;
-                background-color: #808080;
-                border: 5px solid #ff0000;
+                background-color: #1b75bc;
+                border: 9px solid #faa322;
             }
             
             .f-left-wheel.f-active {
@@ -155,8 +151,8 @@
                 right: 11%;
                 bottom: 38%;
                 position: absolute;
-                background-color: #808080;
-                border: 5px solid #ff0000;
+                background-color: #1b75bc;
+                border: 9px solid #faa322;
             }
             
             .f-right-wheel.f-active {
@@ -174,36 +170,44 @@
     <body class="with-fixed-menu">
         <input type="checkbox" class="hidden" id="nav-toggle" autocomplete="off">
         <div class="nav fixed grid-container">
-            <div class="col xs-no md-1"></div>
-            <div class="col xs-12 sm-7 md-6">
-                <span class="logo">IoTR&nbsp;|</span>
-                <ul>
-                    <li class="active"><a href="/dashboard" class="link">Dashboard</a></li>
-                    <li><a href="/settings" class="link">Settings</a></li>
-                    <li><a href="/network" class="link">Network</a></li>
-                    <li><a href="/mqtt" class="link">MQTT</a></li>
-                    <li><a href="/help" class="link">Help</a></li>
-                    <li><a href="/logout" class="link">Logout</a></li>
-                </ul>
-            </div>
-            <div class="col xs-12 sm-3 md-4 text-right">
-                <div class="head-right">
-                    <span id="h-clock">00.00.0000/00:00:00</span>
-                    <span>|</span>
-                    <span id="h-ssid">SSID</span>
-                    <span>|</span>
-                    <span id="h-rssi">RSSI</span>
-                    <span>|</span>
-                    <span id="h-voltage">0.0V</span>
-                    <span>|</span>
-                    <span id="h-mqtt">NO</span>
-                </div>
-            </div>
+			<div class="container">
+				<div class="row">
+					<div class="col col-np xs-12 sm-8 md-7">
+						<img src="logo-white.png" class="logo" alt="IoTR">
+						<ul>
+							<li class="active"><a href="/dashboard" class="link">Dashboard</a></li>
+							<li><a href="/settings" class="link">Settings</a></li>
+							<li><a href="/network" class="link">Network</a></li>
+							<li><a href="/mqtt" class="link">MQTT</a></li>
+							<li><a href="/help" class="link">Help</a></li>
+							<li><a href="/logout" class="link">Logout</a></li>
+						</ul>
+					</div>
+					<div class="col col-np xs-12 sm-4 md-5 text-right">
+						<div class="head-right">
+							<span id="h-clock">00.00.0000/00:00:00</span>
+							<span>|</span>
+							<span id="h-ssid">SSID</span>
+							<span>|</span>
+							<span id="h-rssi">RSSI</span>
+							<span>|</span>
+							<span id="h-voltage">0.0V</span>
+							<span>|</span>
+							<span id="h-mqtt">NO</span>
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
         <label for="nav-toggle"></label>
-        <div class="grid-container">
+        <div class="container">
+			<div class="row">
+				<div class="col xs-12 md-12 pb-0 thin text-right">
+                    <text id="dbg" class="dbg form-control"></text>
+                </div>
+			</div>
             <div class="row">
-                <div class="col xs-12 md-8">
+                <div class="col xs-12 md-12">
                     <div class="f-container">
                         <div id="f-wall" class="f-wall"></div>
                         <div class="f-circle">
@@ -218,25 +222,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="col xs-12 md-4">
-                    <text id="dbg" class="dbg form-control"></text>
-                </div>
             </div>
             <div class="row">
-                <div class="col xs-12 md-3">
-                    <a href="javascript:startDevice();" class="btn btn--m btn--blue">Start</a>
+                <div class="col xs-12 md-6 text-center">
+                    <a href="javascript:startDevice();" class="btn btn-lg btn-blue">Start</a>
                 </div>
-                <div class="col xs-12 md-3">
-                    <a href="javascript:stopDevice();" class="btn btn--m btn--blue">Stop</a>
+                <div class="col xs-12 md-6 text-center">
+                    <a href="javascript:stopDevice();" class="btn btn-lg btn-red">Stop</a>
                 </div>
             </div>
         </div>
-        <div class="grid-container">
-            <div class="row footer">
-                <div class="col xs-12 md-10 footer text-center-xs">
-                    <p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
-                </div>
-            </div>
+        <div class="footer mt-50">
+			<div class="container">
+				<div class="row">
+					<div class="col xs-12 md-10 text-center-xs">
+						<p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
+					</div>
+				</div>
+			</div>
         </div>
         <script language="javascript" type="text/javascript" src="/microajax.js"></script>
         <script language="javascript" type="text/javascript" src="/dev_status.js"></script>

@@ -6,20 +6,25 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>LOGIN</title>
         <link href="reset.css" rel="stylesheet" type="text/css">
-        <link href="style.min.css" rel="stylesheet" type="text/css">
+        <link href="style.css" rel="stylesheet" type="text/css">
     </head>
     <body>
         <div class="login-page">
-            <div class="form">
-                <p><img src="logo.png"></p>
-                <h1>LOGIN</h1>
-                <form class="login-form" method="post">
-                    <input type="text" id="user" name="user" class="form-control" placeholder="User" required="required"/>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required"/>
-                    <input type="submit" class="form-control" value="Login">
-                </form>
-                <p class="message">IoTR</p>
-            </div>
+			<div class="container">
+				<div class="row">
+					<div class="col xs-12 md-6">
+						<img src="logo.svg" class="front-logo" alt="IoTR">
+					</div>
+					<div class="col xs-12 md-6">
+						<h1>Login</h1>
+						<form class="login-form" method="post">
+							<input type="text" id="user" name="user" class="login-form-control" placeholder="User" required="required"/>
+							<input type="password" id="password" name="password" class="login-form-control" placeholder="Password" required="required"/>
+							<div class="text-right"><input type="submit" class="btn btn-lg btn-huge btn-orange" value="GO AHEAD!"></div>
+						</form>
+					</div>
+				</div>
+			</div>
         </div>
     </body>
 </html>

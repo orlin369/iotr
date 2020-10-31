@@ -6,42 +6,44 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>IoTR - SETTINGS</title>
         <link href="reset.css" rel="stylesheet" type="text/css">
-        <link href="style.min.css" rel="stylesheet" type="text/css">
+        <link href="style.css" rel="stylesheet" type="text/css">
     </head>
     <body class="with-fixed-menu">
         <input type="checkbox" class="hidden" id="nav-toggle" autocomplete="off">
         <div class="nav fixed grid-container">
-            <div class="col xs-no md-1"></div>
-            <div class="col xs-12 sm-7 md-6">
-                <span class="logo">IoTR&nbsp;|</span>
-                <ul>
-                    <li><a href="/dashboard" class="link">Dashboard</a></li>
-                    <li class="active"><a href="/settings" class="link">Settings</a></li>
-                    <li><a href="/network" class="link">Network</a></li>
-                    <li><a href="/mqtt" class="link">MQTT</a></li>
-                    <li><a href="/help" class="link">Help</a></li>
-                    <li><a href="/logout" class="link">Logout</a></li>
-                </ul>
-            </div>
-            <div class="col xs-12 sm-3 md-4 text-right">
-                <div class="head-right">
-                    <span id="h-clock">00.00.0000/00:00:00</span>
-                    <span>|</span>
-                    <span id="h-ssid">SSID</span>
-                    <span>|</span>
-                    <span id="h-rssi">RSSI</span>
-                    <span>|</span>
-                    <span id="h-voltage">0.0V</span>
-                    <span>|</span>
-                    <span id="h-mqtt">NO</span>
-                </div>
-            </div>
+			<div class="container">
+				<div class="row">
+					<div class="col col-np xs-12 sm-8 md-7">
+						<img src="logo-white.png" class="logo" alt="IoTR">
+						<ul>
+							<li><a href="/dashboard" class="link">Dashboard</a></li>
+							<li class="active"><a href="/settings" class="link">Settings</a></li>
+							<li><a href="/network" class="link">Network</a></li>
+							<li><a href="/mqtt" class="link">MQTT</a></li>
+							<li><a href="/help" class="link">Help</a></li>
+							<li><a href="/logout" class="link">Logout</a></li>
+						</ul>
+					</div>
+					<div class="col col-np xs-12 sm-4 md-5 text-right">
+						<div class="head-right">
+							<span id="h-clock">00.00.0000/00:00:00</span>
+							<span>|</span>
+							<span id="h-ssid">SSID</span>
+							<span>|</span>
+							<span id="h-rssi">RSSI</span>
+							<span>|</span>
+							<span id="h-voltage">0.0V</span>
+							<span>|</span>
+							<span id="h-mqtt">NO</span>
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
         <label for="nav-toggle"></label>
-        <div class="grid-container">
+        <div class="container">
             <div class="row">
-                <div class="col xs-no md-3"></div>
-                <div class="col xs-12 md-6">
+                <div class="col xs-12 md-12">
                     <!-- System -->
                     <form action="" method="post" class="section">
                         <fieldset>
@@ -84,66 +86,66 @@
                                         <label class="form-label">Reboot device:</label>
                                     </div>
                                     <div class="col xs-12 md-8">
-                                        <a href="javascript:rebootDevice();" class="btn btn--m btn--blue">Reboot</a>
+                                        <a href="javascript:rebootDevice();" class="btn btn-red">Reboot</a>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <input type="submit" class="form-control" value="Save">
+                                    <input type="submit" class="btn btn-block btn-md btn-orange" value="Save">
                                 </div>
                             </div>
                         </fieldset>
                     </form>
                     <!-- NTP -->
                     <form action="" method="post" class="section">
-                            <fieldset>
-                                <legend>NTP Server</legend>
-                                <div class="grid-container">
-                                    <div class="row">
-                                        <div class="col xs-12 md-3 text-right">
-                                            <label for="ntp-domain" class="form-label">NTP Server:</label>
-                                        </div>
-                                        <div class="col xs-12 md-8">
-                                            <input type="text" id="ntp-domain" name="ntp-domain" value="" class="form-control" placeholder="NTP Domain"/>
-                                        </div>
+                        <fieldset>
+                            <legend>NTP Server</legend>
+                            <div class="grid-container">
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="ntp-domain" class="form-label">NTP Server:</label>
                                     </div>
-                                    <div class="row">
-                                        <div class="col xs-12 md-3 text-right">
-                                            <label for="ntp-tz" class="form-label">Timezone:</label>
-                                        </div>
-                                        <div class="col xs-12 md-8">
-                                            <select id="ntp-tz" name="ntp-tz" class="form-control" placeholder="+2" required="required">
-                                                <option value="-11">-11</option>
-                                                <option value="-10">-10</option>
-                                                <option value="-9">-9</option>
-                                                <option value="-8">-8</option>
-                                                <option value="-7">-7</option>
-                                                <option value="-6">-6</option>
-                                                <option value="-5">-5</option>
-                                                <option value="-4">-4</option>
-                                                <option value="-3">-3</option>
-                                                <option value="-2">-2</option>
-                                                <option value="-1">-1</option>
-                                                <option value="0">+0</option>
-                                                <option value="1">+1</option>
-                                                <option value="2">+2</option>
-                                                <option value="3">+3</option>
-                                                <option value="4">+4</option>
-                                                <option value="5">+5</option>
-                                                <option value="6">+6</option>
-                                                <option value="7">+7</option>
-                                                <option value="8">+8</option>
-                                                <option value="9">+9</option>
-                                                <option value="10">+10</option>
-                                                <option value="11">+11</option>
-                                                <option value="12">+12</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <input type="submit" class="form-control" value="Save">
+                                    <div class="col xs-12 md-8">
+                                        <input type="text" id="ntp-domain" name="ntp-domain" value="" class="form-control" placeholder="NTP Domain"/>
                                     </div>
                                 </div>
-                            </fieldset>
+                                <div class="row">
+                                    <div class="col xs-12 md-3 text-right">
+                                        <label for="ntp-tz" class="form-label">Timezone:</label>
+                                    </div>
+                                    <div class="col xs-12 md-8">
+                                        <select id="ntp-tz" name="ntp-tz" class="form-control" placeholder="+2" required="required">
+                                            <option value="-11">-11</option>
+                                            <option value="-10">-10</option>
+                                            <option value="-9">-9</option>
+                                            <option value="-8">-8</option>
+                                            <option value="-7">-7</option>
+                                            <option value="-6">-6</option>
+                                            <option value="-5">-5</option>
+                                            <option value="-4">-4</option>
+                                            <option value="-3">-3</option>
+                                            <option value="-2">-2</option>
+                                            <option value="-1">-1</option>
+                                            <option value="0">+0</option>
+                                            <option value="1">+1</option>
+                                            <option value="2">+2</option>
+                                            <option value="3">+3</option>
+                                            <option value="4">+4</option>
+                                            <option value="5">+5</option>
+                                            <option value="6">+6</option>
+                                            <option value="7">+7</option>
+                                            <option value="8">+8</option>
+                                            <option value="9">+9</option>
+                                            <option value="10">+10</option>
+                                            <option value="11">+11</option>
+                                            <option value="12">+12</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <input type="submit" class="btn btn-block btn-md btn-orange" value="Save">
+                                </div>
+                            </div>
+                        </fieldset>
                     </form>
                     <!-- Credentils -->
                     <form action="" method="post" class="section">
@@ -167,19 +169,22 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <input type="submit" class="form-control" value="Save">
+                                    <input type="submit" class="btn btn-block btn-md btn-orange" value="Save">
                                 </div>
                             </div>
                         </fieldset>
                     </form>
                 </div>
-                <div class="row footer">
-                    <div class="col xs-no md-1"></div>
-                    <div class="col xs-12 md-10 footer text-center-xs">
-                        <p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
-                    </div>
-                </div>
             </div>
+        </div>
+		<div class="footer mt-50">
+			<div class="container">
+				<div class="row">
+					<div class="col xs-12 md-10 text-center-xs">
+						<p style="padding-top: 10px;"><strong>IoTR</strong> was designed and built by Orlin Dimitrov.</p>
+					</div>
+				</div>
+			</div>
         </div>
         <script language="javascript" type="text/javascript" src="/microajax.js"></script>
         <script language="javascript" type="text/javascript" src="/dev_status.js"></script>

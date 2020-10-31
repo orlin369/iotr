@@ -228,8 +228,8 @@ void WEBServer::initRouts() {
 		}
 		});
 
-	on(BZF_STYLE_MIN_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
-		if (!this->handleFileRead(BZF_STYLE_MIN_PATH, request))
+	on(BZF_STYLE_PATH, HTTP_GET, [this](AsyncWebServerRequest* request) {
+		if (!this->handleFileRead(BZF_STYLE_PATH, request))
 		{
 			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
 		}
@@ -1201,10 +1201,10 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest* request) {
 		PROGMEMFileL = true;
 		response = request->beginResponse_P(200, BZF_RESET_MT, bzf_reset, BZF_RESET_SIZE);
 	}
-	else if (path == BZF_STYLE_MIN_PATH)
+	else if (path == BZF_STYLE_PATH)
 	{
 		PROGMEMFileL = true;
-		response = request->beginResponse_P(200, BZF_STYLE_MIN_MT, bzf_style_min, BZF_STYLE_MIN_SIZE);
+		response = request->beginResponse_P(200, BZF_STYLE_MT, bzf_style, BZF_STYLE_SIZE);
 	}
 	// JS
 	else if (path == BZF_MICROAJAX_PATH)
