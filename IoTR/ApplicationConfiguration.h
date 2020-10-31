@@ -189,6 +189,7 @@ static const uint8_t D3 = 0;
 #define DEFAULT_MQTT_PASS ""
 #define MQTT_HEARTBEAT_TIME 5000UL
 
+// oraganization/product/hostname/function/subfunction
 #define TOPIC_SER_OUT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/serial/out")).c_str()
 #define TOPIC_SER_IN String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/serial/in")).c_str()
 #define TOPIC_STAT String(String("roboleague/iotr/") + NetworkConfiguration.Hostname + String("/status")).c_str()
