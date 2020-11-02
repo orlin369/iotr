@@ -1229,6 +1229,12 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest* request) {
 		PROGMEMFileL = true;
 		response = request->beginResponse_P(200, BZF_LOGO_MT, bzf_logo, BZF_LOGO_SIZE);
 	}
+	// Logo White
+	else if (path == BZF_LOGO_WHITE_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_LOGO_WHITE_MT, bzf_logo_white, BZF_LOGO_WHITE_SIZE);
+	}
 
 #ifdef ENABLE_EDITOR
 	// Editor
