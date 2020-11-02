@@ -129,6 +129,9 @@ class HeaderBuilder:
         elif filename.endswith(".gz"):
             mime_type = "application/x-gzip"
 
+        elif filename.endswith(".svg"):
+            mime_type = "image/svg+xml"
+
         return mime_type
 
     def __generate_name(self, base_path, dir_item):
