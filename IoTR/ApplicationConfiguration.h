@@ -68,8 +68,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Enable device control. */
 #define ENABLE_DEVICE_CONTROL
 
-//#define ENABLE_ROOMBA
-
 #define USE_PROGMEM_FS
 
 /** @brief Enable rescue button. */
@@ -245,25 +243,5 @@ static const uint8_t D3 = 0;
 #endif // ENABLE_RESCUE_BTN
 
 #pragma endregion
-
-#ifdef ENABLE_ROOMBA
-#define clamp(value, min, max) (value < min ? min : value > max ? max : value)
-/*
-https://hackster.imgix.net/uploads/attachments/669065/screen_shot_2018-11-27_at_9_16_23_am_KEhMKbIVWR.png?auto=compress%2Cformat&w=680&h=510&fit=max
-+-----+--------+--------+
-| PIN | Signal | Color  |
-+-----+--------+--------+
-|   1 | Vpwr   | Red    |
-|   2 | Vpwr   | Red    |
-|   3 | RXD    | White  |
-|   4 | TXD    | Green  |
-|   5 | BRC    | Yellow |
-|   6 | GND    | Gray   |
-|   7 | GND    | Grey   |
-+-----+--------+--------+
-
-*/
-
-#endif // ENABLE_ROOMBA
 
 #endif // _APPLICATIONCONFIGURATION_h

@@ -82,18 +82,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Variables
 
+/** @brief NTP UDP socket. */
 WiFiUDP NTP_UDP_g;
 
+/** @brief NTP client. */
 NTPClient NTPClient_g(NTP_UDP_g);
 
+/** @brief WiFi connection timer. */
 FxTimer WiFiConnTimer_g = FxTimer();
 
+/** @brief MQTT connection timer. */
 FxTimer MQTTConnTimer_g = FxTimer();
 
+/** @brief Heart beat timer. */
 FxTimer HeartbeatTimer_g = FxTimer();
 
+/** @brief Device state timer. */
 FxTimer DeviceStateTimer_g = FxTimer();
 
+/** @brief MQTT client */
 AsyncMqttClient MQTTClient_g;
 
 #ifdef ENABLE_IR_INTERFACE
@@ -106,6 +113,7 @@ decode_results IRResults_g;
 
 #endif // ENABLE_IR_INTERFACE
 
+/** @brief Timestamp text buffer. */
 char TimestampBuff_g[18];
 
 #pragma endregion
@@ -784,68 +792,6 @@ void read_device_serial()
 
 #pragma endregion
 
-#ifdef ENABLE_ROOMBA
-
-void wakeUp(void) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	int ddPin = D1;
-	pinMode(ddPin, OUTPUT);
-	digitalWrite(ddPin, HIGH);
-	delay(100);
-	digitalWrite(ddPin, LOW);
-	delay(500);
-	digitalWrite(ddPin, HIGH);
-	delay(2000);
-}
-
-void startSafe() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	COM_PORT.write(128);  //Start
-	COM_PORT.write(131);  //Safe mode
-	delay(1000);
-}
-
-void drive(int velocity, int radius) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	clamp(velocity, -500, 500); //def max and min velocity in mm/s
-	clamp(radius, -2000, 2000); //def max and min radius in mm
-
-	COM_PORT.write(137);
-	COM_PORT.write(velocity >> 8);
-	COM_PORT.write(velocity);
-	COM_PORT.write(radius >> 8);
-	COM_PORT.write(radius);
-}
-
-void turnCW(unsigned short velocity, unsigned short degrees) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	drive(velocity, -1);
-	clamp(velocity, 0, 500);
-	delay(6600);
-	drive(0, 0);
-}
-#endif // ENABLE_ROOMBA
-
 void setup()
 {
 	// Setup debug port module.
@@ -856,12 +802,6 @@ void setup()
 
 	// Setup the relay.
 	pinMode(PIN_RELAY, OUTPUT);
-
-#ifdef ENABLE_ROOMBA
-	wakeUp();
-	startSafe();
-	turnCW(40, 180);
-#endif // ENABLE_ROOMBA
 
 #ifdef ENABLE_RESCUE_BTN
 	config_rescue_procedure();
