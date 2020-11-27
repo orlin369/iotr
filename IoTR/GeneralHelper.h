@@ -105,6 +105,15 @@ int to_hours(int minutes);
  */
 void show_device_properties();
 
+#ifdef BATT_MONITOR
+
+/** @brief Read battery voltage.
+ *  @return float voltage.
+ */
+float battery_voltage(int pin);
+
+#endif
+
 #pragma endregion
 
 #endif

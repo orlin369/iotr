@@ -929,7 +929,11 @@ void loop()
 			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
 
 			DeviceStatus.Timestamp = NTPClient_g.getEpochTime(); // -DeviceConfiguration.NTPTimezone;
-			DeviceStatus.Voltage = (int)map(analogRead(A0), 0, 1023, 0, 3.3);
+#ifdef ESP32
+			DeviceStatus.Voltage = battery_voltage(PIN_BATT);
+#elif defined(ESP8266)
+			DeviceStatus.Voltage = 0.0F;
+#endif
 			DeviceStatus.RSSI = WiFi.RSSI();
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
 			DeviceStatus.Flags = 0; // TODO: Flags

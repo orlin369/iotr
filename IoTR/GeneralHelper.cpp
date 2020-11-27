@@ -145,3 +145,23 @@ void show_device_properties() {
 	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
 	DEBUGLOG("\r\n");
 }
+
+#ifdef ESP32
+
+#ifdef BATT_MONITOR
+
+/** @brief Read battery voltage.
+ *  @return float voltage.
+ */
+float battery_voltage(int pin)
+{
+	static float batt_voltage = 0.0;
+
+	float batt_voltage = (float)(analogRead(pin)/4095)*2*3.3*1.1;
+
+	return batt_voltage;
+}
+
+#endif
+
+#endif
