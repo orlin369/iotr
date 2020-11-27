@@ -163,39 +163,6 @@ void configure_arduino_ota();
 
 #pragma region Functions
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
- */
-void show_device_properties() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#ifdef ESP32
-// ESP32
-	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-
-#elif defined(ESP8266)
-// ESP8266
-	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
-	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-#endif
-
-	DEBUGLOG("\r\n");
-}
-
 #pragma region SOFTWARE ON OFF
 
 void power_on() {
