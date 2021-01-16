@@ -84,7 +84,7 @@ class HeaderBuilder:
 
     def __generate_include_line(self, file_name):
 
-        return "#include \"src\\{}\"".format(file_name)
+        return "#include \"pages\\{}\"".format(file_name)
 
     def __get_content_type(self, filename):
 
@@ -171,7 +171,7 @@ class HeaderBuilder:
 
         # Generate output file name.
         out_file_name = self.__generate_name(self.__base_path, dir_item)
-        dst_file_path = os.path.join(self.__base_path, "..\\src\\", out_file_name)
+        dst_file_path = os.path.join(self.__base_path, "..\\pages\\", out_file_name)
 
         # Header name
         self.__output_file.write_header(out_file_name)
