@@ -30,8 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
-#include "ApplicationConfiguration.h"
-
 typedef struct {
 	bool Wall = false; ///< Wall sensor.
 	bool CliffLeft = false; ///< Password - WWW password. Set default value.
