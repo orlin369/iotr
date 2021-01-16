@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // WEBServer.h
 
-#ifndef _SMARTSCALEWEBSERVER_h
-#define _SMARTSCALEWEBSERVER_h
+#ifndef _WEBSERVER_h
+#define _WEBSERVER_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
@@ -34,7 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define ESS_LOG "log"
 #define ESS_IR_CMD "irCommand"
-#define ESS_DEV_STATE "deviceState"
 #define ESS_DEV_STATUS "deviceStatus"
 
 #define ROUT_EDITOR "/edit"
@@ -43,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ROUT_PAGE_HOME "/"
 #define ROUT_PAGE_LOGIN "/login"
 #define ROUT_PAGE_DASHBOARD "/dashboard"
+#define ROUT_PAGE_APP "/app"
 #define ROUT_PAGE_SETTINGS "/settings"
 #define ROUT_PAGE_NETWORK "/network"
 #define ROUT_PAGE_MQTT "/mqtt"
@@ -57,8 +57,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ROUT_API_NET_SCAN "/api/v1/scan"
 #define ROUT_API_AUTH "/api/v1/auth"
 #define ROUT_API_MQTT "/api/v1/mqtt"
-#define ROUT_API_DEVICE_STOP "/api/v1/device/stop"
-#define ROUT_API_DEVICE_START "/api/v1/device/start"
 #define ROUT_API_REBOOT "/api/v1/reboot"
 #define ROUT_API_UPLOAD "/api/v1/upload"
 #define ROUT_API_EVENTS "/api/v1/events"
@@ -103,20 +101,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "GeneralHelper.h"
 
 #ifdef USE_PROGMEM_FS
-#include "src\bzf_dashboard.h"
-#include "src\bzf_dev_status.h"
-#include "src\bzf_edit.h"
-#include "src\bzf_favicon.h"
-#include "src\bzf_help.h"
-#include "src\bzf_login.h"
-#include "src\bzf_logo_white.h"
-#include "src\bzf_logo.h"
-#include "src\bzf_microajax.h"
-#include "src\bzf_mqtt.h"
-#include "src\bzf_network.h"
-#include "src\bzf_reset.h"
-#include "src\bzf_settings.h"
-#include "src\bzf_style.h"
+#include "pages\bzf_dashboard.h"
+#include "pages\bzf_app.h"
+#include "pages\bzf_dev_status.h"
+#include "pages\bzf_edit.h"
+#include "pages\bzf_favicon.h"
+#include "pages\bzf_help.h"
+#include "pages\bzf_login.h"
+#include "pages\bzf_logo_white.h"
+#include "pages\bzf_logo.h"
+#include "pages\bzf_microajax.h"
+#include "pages\bzf_mqtt.h"
+#include "pages\bzf_network.h"
+#include "pages\bzf_reset.h"
+#include "pages\bzf_settings.h"
+#include "pages\bzf_style.h"
 #endif // USE_PROGMEM_FS
 
 #pragma endregion
@@ -139,8 +138,9 @@ public:
 	 */
 	void begin(FS* fs);
 
-	/** @brief Handle OTA process.
-	 *  @return Void.
+	/**
+	 * @brief Handle periodic processes.
+	 * 
 	 */
 	void update();
 	
@@ -150,26 +150,12 @@ public:
 	  */
 	void sendDeviceStatus(String status);
 
+	/**
+	 * @brief Display IR command.
+	 * 
+	 * @param command The command.
+	 */
 	void displayIRCommand(uint32_t command);
-
-	void displayLog(String line);
-
-	/** @brief Send device state.
-	 *  @return Void.
-	 */
-	void sendDeviceState(String device_state);
-
-	/** @brief Set start process function. Part of the API.
-	 *  @param callback, Start function.
-	 *  @return Void.
-	 */
-	void setCbStartDevice(void(*callback)(void));
-
-	/** @brief Set stop process function. Part of the API.
-	 *  @param callback, Stop function.
-	 *  @return Void.
-	 */
-	void setCbStopDevice(void(*callback)(void));
 
 	/** @brief Set reboot process function. Part of the API.
 	 *  @param callback, Reboot function.
@@ -183,29 +169,46 @@ protected:
 
 #pragma region Variables
 
-	/* @brief File system object. */
+	/**
+	 * @brief File system object.
+	 * 
+	 */
 	FS* m_fileSystem;
 
+	/**
+	 * @brief Cookie
+	 * 
+	 */
 	String m_Cookie = "";
 
-	/* @brief Seconds tick handler. */
+	/**
+	 * @brief Seconds tick handler.
+	 * 
+	 */
 	Ticker m_eventUpdater;
 
-	/* @brief Events API handler. */
+	/**
+	 * @brief Events API handler.
+	 * 
+	 */
 	AsyncEventSource m_webSocketEvents = AsyncEventSource(ROUT_API_EVENTS);
 
+	/**
+	 * @brief Keep alive time.
+	 * 
+	 */
 	unsigned int m_keepAliveTime = 0;
 
-	/** @brief Callback function. */
-	void(*m_callbackStartDevice)(void);
-
-	/** @brief Callback function. */
-	void(*m_callbackStopDevice)(void);
-
-	/** @brief Callback function. */
+	/**
+	 * @brief Callback function
+	 * 
+	 */
 	void(*m_callbackReboot)(void);
 
-	/** @brief Callback function. */
+	/**
+	 * @brief Callback function.
+	 * 
+	 */
 	String(*m_callbackUpdateHeaderData)(void);
 
 #pragma endregion
@@ -375,8 +378,8 @@ protected:
 
 };
 
-/* @brief Singleton Smart scale server instance. */
-extern WEBServer LocalWEBServer;
+/* @brief Singleton base WEB server instance. */
+//extern WEBServer LocalWEBServer;
 
 #endif
 

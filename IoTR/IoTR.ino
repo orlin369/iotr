@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#define ESS_DEV_STATE "deviceState"
+#define ROUT_API_DEVICE_STOP "/api/v1/device/stop"
+#define ROUT_API_DEVICE_START "/api/v1/device/start"
+
 #pragma region Headers
 
 /* Application configuration. */
@@ -48,12 +52,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Device configuration. */
 #include "NetworkConfiguration.h"
 
-/* Smart scale WEB server. */
+/* Base WEB server. */
 #include "WEBServer.h"
 
 #include "FxTimer.h"
-
-#include "DeviceState.h"
 
 #include "DeviceStatus.h"
 
@@ -78,43 +80,289 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RescueButton.h"
 #endif // ENABLE_RESCUE_BTN
 
+#ifdef USE_PROGMEM_FS
+#include "pages\bzf_app.h"
+#endif
+
+#include "DeviceState.h"
+
+#pragma endregion
+
+#pragma region Classes
+
+class AppWEBServer : public WEBServer {
+
+protected:
+
+	/**
+	 * @brief Callback function for starting device.
+	 * 
+	 */
+	void(*m_callbackStartDevice)(void);
+
+	/**
+	 * @brief Callback function for stopping device.
+	 * 
+	 */
+	void(*m_callbackStopDevice)(void);
+
+	void setAppRouts()
+	{
+		// Stop device.
+		on(ROUT_API_DEVICE_STOP, [this](AsyncWebServerRequest* request) {
+			if (!this->isLoggedin(request))
+			{
+				this->goToLogin(request);
+				return;
+			}
+
+			if (this->m_callbackStopDevice != nullptr)
+			{
+				this->m_callbackStopDevice();
+			}
+
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
+
+			this->clearAliveTime();
+		});
+
+		// Start device.
+		on(ROUT_API_DEVICE_START, [this](AsyncWebServerRequest* request) {
+			if (!this->isLoggedin(request))
+			{
+				this->goToLogin(request);
+				return;
+			}
+
+			if (this->m_callbackStartDevice != nullptr)
+			{
+				this->m_callbackStartDevice();
+			}
+
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
+
+			this->clearAliveTime();
+		});
+
+		on("/api/v1/keepalive", [this](AsyncWebServerRequest* request) {
+			if (!this->isLoggedin(request))
+			{
+				this->goToLogin(request);
+				return;
+			}
+
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
+
+			this->clearAliveTime();
+		});
+
+		// Start device.
+		on("/api/v1/device/serial", [this](AsyncWebServerRequest* request) {
+			if (!this->isLoggedin(request))
+			{
+				this->goToLogin(request);
+				return;
+			}
+
+			if (request->args() > 0)  // Save Settings
+			{
+				for (uint8_t index = 0; index < request->args(); index++)
+				{
+					DEBUGLOG("Arg %s: %s\r\n", request->argName(index).c_str(), urlDecode(request->arg(index)).c_str());
+
+					// HTTP Authentication.
+					if (request->argName(index) == "read") {
+						Serial.print(urlDecode(request->arg(index)));
+						continue;
+					}
+
+					if (request->argName(index) == "write") {
+						Serial.print(urlDecode(request->arg(index)));
+						continue;
+					}
+				}
+			}
+
+			request->send(200, MIME_TYPE_PLAIN_TEXT, "");
+
+			this->clearAliveTime();
+		});
+
+	}
+
+public:
+
+	/**
+	 * @brief Construct a new App W E B Server object
+	 * 
+	 * @param port , uint16_t WEB server port.
+	 */
+	AppWEBServer(uint16_t port) : WEBServer(port) {}
+
+	/**
+	 * @brief Execute every one second, if attached event. Part of the API.
+	 * 
+	 * @param device_state Device state.
+	 */
+	void sendDeviceState(String device_state) {
+	/*
+	#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+	#endif // SHOW_FUNC_NAMES
+	*/
+
+		// Check does have someone connected.
+		if (m_webSocketEvents.count() > 0)
+		{
+			m_webSocketEvents.send(device_state.c_str(), ESS_DEV_STATE);
+		}
+	}
+
+	/**
+	 * @brief Initialize the application.
+	 * 
+	 * @param fs File System pointer.
+	 */
+	void init(FS* fs)
+	{
+		this->begin(fs);
+		this->setAppRouts();
+	}
+
+	/**
+	 * @brief Set the Cb Start Device object
+	 * 
+	 * @param callback Callback pointer.
+	 */
+	void setCbStartDevice(void(*callback)(void)) {
+	#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+	#endif // SHOW_FUNC_NAMES
+
+		this->m_callbackStartDevice = callback;
+	}
+
+	/**
+	 * @brief Set the Cb Stop Device object
+	 * 
+	 * @param callback Callback pointer.
+	 */
+	void setCbStopDevice(void(*callback)(void)) {
+	#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+	#endif // SHOW_FUNC_NAMES
+
+		this->m_callbackStopDevice = callback;
+	}
+
+	/**
+	 * @brief Display log line.
+	 * 
+	 * @param line Text of the line.
+	 */
+	void displayLog(String line) {
+	#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+	#endif // SHOW_FUNC_NAMES
+
+		if (m_webSocketEvents.count() > 0) {
+			m_webSocketEvents.send(line.c_str(), ESS_LOG);
+		}
+	}
+};
+
 #pragma endregion
 
 #pragma region Variables
 
+/**
+ * @brief NTP UDP socket client.
+ * 
+ */
 WiFiUDP NTP_UDP_g;
 
+/**
+ * @brief NTP Client instance.
+ * 
+ * @return NTPClient 
+ */
 NTPClient NTPClient_g(NTP_UDP_g);
 
+/**
+ * @brief Wi-Fi Connection timer.
+ * 
+ */
 FxTimer WiFiConnTimer_g = FxTimer();
 
+/**
+ * @brief MQTT Conenction timer.
+ * 
+ */
 FxTimer MQTTConnTimer_g = FxTimer();
 
-FxTimer HeartbeatTimer_g = FxTimer();
+/**
+ * @brief Device status timer.
+ * 
+ */
+FxTimer DeviceStatusTimer_g = FxTimer();
 
+/**
+ * @brief Device state timer.
+ * 
+ */
 FxTimer DeviceStateTimer_g = FxTimer();
 
+/**
+ * @brief MQTT Client.
+ * 
+ */
 AsyncMqttClient MQTTClient_g;
 
 #ifdef ENABLE_IR_INTERFACE
 
-/* @brief IR receiver. */
-IRrecv IRReciver_g(PIN_IR_RECV);
+/**
+ * @brief IR receiver.
+ * 
+ * @return IRrecv 
+ */
+IRrecv IRReceiver_g(PIN_IR_RECV);
 
-/* @brief IR receiver result. */
+/**
+ * @brief IR receiver result.
+ * 
+ */
 decode_results IRResults_g;
 
 #endif // ENABLE_IR_INTERFACE
 
+/**
+ * @brief Timestamp text buffer.
+ * 
+ */
 char TimestampBuff_g[18];
+
+/**
+ * @brief Application WEB server.
+ * 
+ * @return AppWEBServer 
+ */
+AppWEBServer AppWEBServer_g(WEB_SERVER_PORT);
 
 #pragma endregion
 
 #pragma region Prototypes
 
-/** @brief Configure the file system.
- *  @param fileSystem FS, File system object.
- *  @return Void.
+/**
+ * @brief Configure the file system.
+ * 
  */
 void configure_file_system();
 
@@ -126,36 +374,45 @@ void configure_file_system();
 #elif defined(ESP8266)
 // ESP8266
 
-/** @brief Configure WiFi module to access point.
- *  @return Void.
+/**
+ * @brief Configure WiFi module to access point.
+ * 
  */
 void configure_to_ap();
 
-/** @brief Handler that execute when client is connected.
- *  @param const WiFiEventSoftAPModeStationConnected& evt, Callback handler
- *  @return Void.
+/**
+ * @brief Handler that execute when client is connected.
+ * 
+ * @param evt Callback handler
  */
 void handler_ap_mode_station_connected(const WiFiEventSoftAPModeStationConnected& evt);
 
-/** @brief Handler that execute when client is disconnected.
- *  @param const WiFiEventSoftAPModeStationDisconnected& evt, Callback handler
- *  @return Void.
+/**
+ * @brief Handler that execute when client is disconnected.
+ * 
+ * @param evt Callback handler
  */
 void handler_ap_mode_station_disconnected(const WiFiEventSoftAPModeStationDisconnected& evt);
 
 #endif
 
-/** @brief Configure WiFi module to station.
- *  @return Void.
+/**
+ * @brief Configure WiFi module to station.
+ * 
  */
 void configure_to_sta();
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
+/**
+ * @brief Printout in the debug console flash state.
+ * 
  */
 void show_device_properties();
 
 #ifdef ENABLE_ARDUINO_OTA
+/**
+ * @brief Configure Arduino OTA module.
+ * 
+ */
 void configure_arduino_ota();
 #endif // ENABLE_ARDUINO_OTA
 
@@ -163,8 +420,9 @@ void configure_arduino_ota();
 
 #pragma region Functions
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
+/**
+ * @brief Printout in the debug console flash state.
+ * 
  */
 void show_device_properties() {
 #ifdef SHOW_FUNC_NAMES
@@ -173,31 +431,25 @@ void show_device_properties() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#ifdef ESP32
-// ESP32
-	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-
-#elif defined(ESP8266)
+#if ESP8266
 // ESP8266
 	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
+#endif
 	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
 	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
 	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
 	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
 	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
 	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-#endif
-
 	DEBUGLOG("\r\n");
 }
 
 #pragma region SOFTWARE ON OFF
 
+/**
+ * @brief Power ON the target device.
+ * 
+ */
 void power_on() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -210,6 +462,10 @@ void power_on() {
 	MQTTClient_g.publish(TOPIC_RELAY_OUT, 2, true, "1");
 }
 
+/**
+ * @brief Power OFF the target device.
+ * 
+ */
 void power_off() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -226,9 +482,9 @@ void power_off() {
 
 #pragma region File System
 
-/** @brief Configure the file system.
- *  @param fileSystem FS, File system object.
- *  @return Void.
+/**
+ * @brief Configure the file system.
+ * 
  */
 void configure_file_system() {
 #ifdef SHOW_FUNC_NAMES
@@ -287,6 +543,10 @@ void configure_file_system() {
 #ifdef ESP32
 // ESP32
 
+/**
+ * @brief Configure to AP mode for ESP32.
+ * 
+ */
 void configure_to_ap() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -325,8 +585,9 @@ void configure_to_ap() {
 #elif defined(ESP8266)
 // ESP8266
 
-/** @brief Configure WiFi module to access point.
- *  @return Void.
+/**
+ * @brief Configure to AP mode for ESP8266.
+ * 
  */
 void configure_to_ap() {
 	DEBUGLOG("\r\n");
@@ -399,8 +660,9 @@ void handler_ap_mode_station_disconnected(const WiFiEventSoftAPModeStationDiscon
 
 #pragma region STA mode
 
-/** @brief Configure WiFi module to station.
- *  @return Void.
+/**
+ * @brief Configure WiFi module to station.
+ * 
  */
 void configure_to_sta() {
 #ifdef SHOW_FUNC_NAMES
@@ -470,6 +732,10 @@ void configure_to_sta() {
 
 #pragma region Local WEB Server
 
+/**
+ * @brief Configure the WEB server.
+ * 
+ */
 void configure_web_server() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -477,12 +743,16 @@ void configure_web_server() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	LocalWEBServer.begin(&SPIFFS);
-	LocalWEBServer.setCbStopDevice(power_off);
-	LocalWEBServer.setCbStartDevice(power_on);
-	LocalWEBServer.setCbReboot(reboot);
+	AppWEBServer_g.init(&SPIFFS);
+	AppWEBServer_g.setCbReboot(reboot);
+	AppWEBServer_g.setCbStopDevice(power_off);
+	AppWEBServer_g.setCbStartDevice(power_on);
 }
 
+/**
+ * @brief Reboot callback.
+ * 
+ */
 void reboot() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -499,6 +769,10 @@ void reboot() {
 
 #ifdef ENABLE_ARDUINO_OTA
 
+/**
+ * @brief Configure Arduino OTA module.
+ * 
+ */
 void configure_arduino_ota() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -567,6 +841,10 @@ void configure_arduino_ota() {
 
 #pragma region NTP
 
+/**
+ * @brief Configure NTP module.
+ * 
+ */
 void configure_ntp() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -584,6 +862,11 @@ void configure_ntp() {
 
 #pragma region MQTT Service
 
+/**
+ * @brief On MQTT Connect.
+ * 
+ * @param sessionPresent Session present.
+ */
 void onMqttConnect(bool sessionPresent) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -609,6 +892,11 @@ void onMqttConnect(bool sessionPresent) {
 	DEBUGLOG("Subscribing at QoS 2, packetId: %d\r\n", PacketIdSubL);
 }
 
+/**
+ * @brief On MQTT Disconnect.
+ * 
+ * @param reason Reason for disconnect.
+ */
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -623,6 +911,12 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 	}
 }
 
+/**
+ * @brief On MQTT Subscribe.
+ * 
+ * @param packetId Packet ID.
+ * @param qos Quality od service.
+ */
 void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -635,6 +929,11 @@ void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
 	DEBUGLOG("  qos: %d\r\n", qos);
 }
 
+/**
+ * @brief On MQTT Unsubscribe.
+ * 
+ * @param packetId Packet ID.
+ */
 void onMqttUnsubscribe(uint16_t packetId) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -646,6 +945,16 @@ void onMqttUnsubscribe(uint16_t packetId) {
 	DEBUGLOG("  packetId: %d\r\n", packetId);
 }
 
+/**
+ * @brief On MQTT Message
+ * 
+ * @param topic Topic name.
+ * @param payload Payload data.
+ * @param properties Properties.
+ * @param len Data length.
+ * @param index Message index.
+ * @param total Total message indexes.
+ */
 void onMqttMessage(
 	char* topic,
 	char* payload,
@@ -707,6 +1016,11 @@ void onMqttMessage(
 	DEBUGLOG("  total: %d\r\n", total);
 }
 
+/**
+ * @brief On MQTT Publish.
+ * 
+ * @param packetId Packet ID.
+ */
 void onMqttPublish(uint16_t packetId) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -718,6 +1032,10 @@ void onMqttPublish(uint16_t packetId) {
 	DEBUGLOG("  packetId: %d\r\n", packetId);
 }
 
+/**
+ * @brief MQTT Begin.
+ * 
+ */
 void mqtt_begin() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -736,6 +1054,10 @@ void mqtt_begin() {
 	MQTTConnTimer_g.setExpirationTime(5000);
 }
 
+/**
+ * @brief MQTT Reconnect.
+ * 
+ */
 void mqtt_reconnect()
 {
 	// Check does the timer has expired.
@@ -758,8 +1080,9 @@ void mqtt_reconnect()
 	}
 }
 
-/** @brief Read incoming data from the serial buffer.
- *  @return Void.
+/**
+ * @brief Read incoming data from the serial buffer.
+ * 
  */
 void read_device_serial()
 {
@@ -817,68 +1140,10 @@ void read_device_serial()
 
 #pragma endregion
 
-#ifdef ENABLE_ROOMBA
-
-void wakeUp(void) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	int ddPin = D1;
-	pinMode(ddPin, OUTPUT);
-	digitalWrite(ddPin, HIGH);
-	delay(100);
-	digitalWrite(ddPin, LOW);
-	delay(500);
-	digitalWrite(ddPin, HIGH);
-	delay(2000);
-}
-
-void startSafe() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	COM_PORT.write(128);  //Start
-	COM_PORT.write(131);  //Safe mode
-	delay(1000);
-}
-
-void drive(int velocity, int radius) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	clamp(velocity, -500, 500); //def max and min velocity in mm/s
-	clamp(radius, -2000, 2000); //def max and min radius in mm
-
-	COM_PORT.write(137);
-	COM_PORT.write(velocity >> 8);
-	COM_PORT.write(velocity);
-	COM_PORT.write(radius >> 8);
-	COM_PORT.write(radius);
-}
-
-void turnCW(unsigned short velocity, unsigned short degrees) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	drive(velocity, -1);
-	clamp(velocity, 0, 500);
-	delay(6600);
-	drive(0, 0);
-}
-#endif // ENABLE_ROOMBA
-
+/**
+ * @brief Setup
+ * 
+ */
 void setup()
 {
 	// Setup debug port module.
@@ -889,12 +1154,6 @@ void setup()
 
 	// Setup the relay.
 	pinMode(PIN_RELAY, OUTPUT);
-
-#ifdef ENABLE_ROOMBA
-	wakeUp();
-	startSafe();
-	turnCW(40, 180);
-#endif // ENABLE_ROOMBA
 
 #ifdef ENABLE_RESCUE_BTN
 	config_rescue_procedure();
@@ -937,7 +1196,7 @@ void setup()
 	{
 		configure_to_sta();
 		NTPClient_g.update();
-		HeartbeatTimer_g.setExpirationTime(MQTT_HEARTBEAT_TIME);
+		DeviceStatusTimer_g.setExpirationTime(MQTT_HEARTBEAT_TIME);
 #ifdef ENABLE_STATUS_LED
 		StatusLed.setAnumation(AnimationType::Green);
 #endif // ENABLE_STATUS_LED
@@ -954,7 +1213,7 @@ void setup()
 	configure_web_server();
 
 #ifdef ENABLE_IR_INTERFACE
-	IRReciver_g.enableIRIn();  // Start the receiver
+	IRReceiver_g.enableIRIn();  // Start the receiver
 #endif // ENABLE_IR_INTERFACE
 
 #ifdef ENABLE_ARDUINO_OTA
@@ -970,19 +1229,20 @@ void setup()
 void loop()
 {
 #ifdef ENABLE_RESQUE_BTN
-	update_recue_procedure();
+	update_rescue_procedure();
 #endif // ENABLE_RESQUE_BTN
 
 	// 
-	LocalWEBServer.update();
+	AppWEBServer_g.update();
 	DeviceStateTimer_g.update();
 	if (DeviceStateTimer_g.expired())
 	{
 		DeviceStateTimer_g.clear();
 
-		LocalWEBServer.sendDeviceStatus(dev_status_to_json());
+		AppWEBServer_g.sendDeviceStatus(dev_status_to_json());
 
-		LocalWEBServer.sendDeviceState(dev_state_to_json());
+		// Update animation.
+		AppWEBServer_g.sendDeviceState(dev_state_to_json());
 
 		// Below code will be removed after release.
 		DeviceState.BumpersAndWheelDrops++;
@@ -996,6 +1256,8 @@ void loop()
 		{
 			DeviceState.BumpersAndWheelDrops = 0;
 		}
+
+		//AppWEBServer_g.displayLog(dev_state_to_json());
 	}
 
 	// If everything is OK with the transport layer.
@@ -1015,10 +1277,10 @@ void loop()
 		}
 
 		// If heartbeat expired then run trough.
-		HeartbeatTimer_g.update();
-		if (HeartbeatTimer_g.expired())
+		DeviceStatusTimer_g.update();
+		if (DeviceStatusTimer_g.expired())
 		{
-			HeartbeatTimer_g.clear();
+			DeviceStatusTimer_g.clear();
 			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
 
 			DeviceStatus.Timestamp = NTPClient_g.getEpochTime(); // -DeviceConfiguration.NTPTimezone;
@@ -1042,10 +1304,10 @@ void loop()
 #endif // ENABLE_ARDUINO_OTA
 
 #ifdef ENABLE_IR_INTERFACE
-	if (IRReciver_g.decode(&IRResults_g))
+	if (IRReceiver_g.decode(&IRResults_g))
 	{
-		LocalWEBServer.displayIRCommand(IRResults_g.command);
-		IRReciver_g.resume();  // Receive the next value
+		AppWEBServer_g.displayIRCommand(IRResults_g.command);
+		IRReceiver_g.resume();  // Receive the next value
 		if (IRResults_g.command != 0)
 		{
 #ifdef ENABLE_DEVICE_CONTROL

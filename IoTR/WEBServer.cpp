@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Headers
 
-/* @brief Smart scale web server. */
+/* @brief Base WEB server. */
 #include "WEBServer.h"
 
 #include <StreamString.h>
@@ -34,8 +34,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Variables
 
-/* @brief Singleton Smart scale server instance. */
-WEBServer LocalWEBServer(WEB_SERVER_PORT);
+/* @brief Singleton base WEB server instance. */
+//WEBServer LocalWEBServer(WEB_SERVER_PORT);
 
 #pragma endregion
 
@@ -85,8 +85,9 @@ void WEBServer::begin(FS* fs) {
 	clearAliveTime();
 }
 
-/** @brief Handle OTA process.
- *  @return Void.
+/**
+ * @brief Handle periodic processes.
+ * 
  */
 void WEBServer::update()
 {
@@ -101,18 +102,11 @@ void WEBServer::update()
 #endif
 }
 
-void WEBServer::displayLog(String line) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	if (m_webSocketEvents.count() > 0) {
-		m_webSocketEvents.send(line.c_str(), ESS_LOG);
-	}
-}
-
+/**
+ * @brief Display IR commend.
+ * 
+ * @param command The command.
+ */
 void WEBServer::displayIRCommand(uint32_t command) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -122,25 +116,6 @@ void WEBServer::displayIRCommand(uint32_t command) {
 
 	if (m_webSocketEvents.count() > 0) {
 		m_webSocketEvents.send(String(command).c_str(), ESS_IR_CMD);
-	}
-}
-
-/** @brief Execute every one second, if attached event. Part of the API.
- *  @return Void.
- */
-void WEBServer::sendDeviceState(String device_state) {
-/*
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-*/
-
-	// Chack does have someone connected.
-	if (m_webSocketEvents.count() > 0)
-	{
-		m_webSocketEvents.send(device_state.c_str(), ESS_DEV_STATE);
 	}
 }
 
@@ -161,34 +136,6 @@ void WEBServer::sendDeviceStatus(String data) {
 	{
 		m_webSocketEvents.send(data.c_str(), ESS_DEV_STATUS);
 	}
-}
-
-/** @brief Set tare process function. Part of the API.
- *  @param callback, Start function.
- *  @return Void.
- */
-void WEBServer::setCbStartDevice(void(*callback)(void)) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	m_callbackStartDevice = callback;
-}
-
-/** @brief Set tare process function. Part of the API.
- *  @param callback, Stop function.
- *  @return Void.
- */
-void WEBServer::setCbStopDevice(void(*callback)(void)) {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	m_callbackStopDevice = callback;
 }
 
 /** @brief Set reboot process function. Part of the API.
@@ -440,6 +387,38 @@ void WEBServer::initRouts() {
 
 #pragma endregion
 
+#pragma region App page API
+
+	// /dashboard
+	on(ROUT_PAGE_APP, HTTP_GET, [this](AsyncWebServerRequest *request) {
+
+		if (!this->isLoggedin(request))
+		{
+			this->goToLogin(request);
+			return;
+		}
+
+		if (!this->handleFileRead("/app.html", request))
+		{
+			request->send(404, MIME_TYPE_PLAIN_TEXT, "FileNotFound");
+		}
+
+		clearAliveTime();
+	});
+
+	// /dashboard
+	on(ROUT_PAGE_APP, HTTP_POST, [this](AsyncWebServerRequest *request) {
+		if (!this->isLoggedin(request))
+		{
+			this->goToLogin(request);
+			return;
+		}
+
+		clearAliveTime();
+	});
+
+#pragma endregion
+
 #pragma region Settings page API
 
 	// /settings
@@ -655,42 +634,6 @@ void WEBServer::initRouts() {
 		}
 
 		this->apiSendMqttCfg(request);
-
-		clearAliveTime();
-	});
-
-	// Stop device.
-	on(ROUT_API_DEVICE_STOP, [this](AsyncWebServerRequest* request) {
-		if (!this->isLoggedin(request))
-		{
-			this->goToLogin(request);
-			return;
-		}
-
-		if (m_callbackStopDevice != nullptr)
-		{
-			m_callbackStopDevice();
-		}
-
-		request->send(200, MIME_TYPE_PLAIN_TEXT, "");
-
-		clearAliveTime();
-	});
-
-	// Start device.
-	on(ROUT_API_DEVICE_START, [this](AsyncWebServerRequest* request) {
-		if (!this->isLoggedin(request))
-		{
-			this->goToLogin(request);
-			return;
-		}
-
-		if (m_callbackStartDevice != nullptr)
-		{
-			m_callbackStartDevice();
-		}
-
-		request->send(200, MIME_TYPE_PLAIN_TEXT, "");
 
 		clearAliveTime();
 	});
@@ -1167,6 +1110,13 @@ bool WEBServer::handleFileRead(String path, AsyncWebServerRequest* request) {
 		response = request->beginResponse_P(200, BZF_DASHBOARD_MT, bzf_dashboard, BZF_DASHBOARD_SIZE);
 	}
 #endif //_BZF_DASHBOARD_H
+#ifdef _BZF_APP_H
+	else if (path == BZF_APP_PATH)
+	{
+		PROGMEMFileL = true;
+		response = request->beginResponse_P(200, BZF_APP_MT, bzf_app, BZF_APP_SIZE);
+	}
+#endif //_BZF_APP_H
 #ifdef _BZF_SETTINGS_H
 	else if (path == BZF_SETTINGS_PATH)
 	{
