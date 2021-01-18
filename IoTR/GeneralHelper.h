@@ -46,6 +46,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ApplicationConfiguration.h"
 
+#include "DebugPort.h"
+
 #pragma endregion
 
 #pragma region Prototypes
@@ -97,6 +99,20 @@ int to_minutes(int minutes);
  *  @return int, Hours.
  */
 int to_hours(int minutes);
+
+/** @brief Printout in the debug console flash state.
+ *  @return Void.
+ */
+void show_device_properties();
+
+#ifdef BATT_MONITOR
+
+/** @brief Read battery voltage.
+ *  @return float voltage.
+ */
+float battery_voltage(int pin);
+
+#endif
 
 #pragma endregion
 

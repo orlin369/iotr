@@ -244,4 +244,15 @@ static const uint8_t D3 = 0;
 
 #pragma endregion
 
+#pragma region Battery Monitoring
+
+#ifdef ESP32
+
+#define BATT_MONITOR
+#define PIN_BATT A13
+
+#endif // ESP32
+
+#pragma endregion
+
 #endif // _APPLICATIONCONFIGURATION_h

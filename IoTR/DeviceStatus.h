@@ -46,7 +46,7 @@ typedef struct {
 	unsigned long Timestamp = 0; ///< Timestamp.
 	unsigned int Flags = 0; ///< Status flags.
 	unsigned int FreeHeap = 0; ///< Heap.
-	int Voltage = 0; ///< Device voltage.
+	float Voltage = 0; ///< Device voltage.
 	int RSSI = 0; ///< Device name.
 	String SSID = ""; ///< Device name.
 } DeviceStatus_t;

@@ -283,47 +283,25 @@ public:
 
 #pragma region Variables
 
-/**
- * @brief NTP UDP socket client.
- * 
- */
+/** @brief NTP UDP socket. */
 WiFiUDP NTP_UDP_g;
 
-/**
- * @brief NTP Client instance.
- * 
- * @return NTPClient 
- */
+/** @brief NTP client. */
 NTPClient NTPClient_g(NTP_UDP_g);
 
-/**
- * @brief Wi-Fi Connection timer.
- * 
- */
+/** @brief WiFi connection timer. */
 FxTimer WiFiConnTimer_g = FxTimer();
 
-/**
- * @brief MQTT Conenction timer.
- * 
- */
+/** @brief MQTT connection timer. */
 FxTimer MQTTConnTimer_g = FxTimer();
 
-/**
- * @brief Device status timer.
- * 
- */
-FxTimer DeviceStatusTimer_g = FxTimer();
+/** @brief Heart beat timer. */
+FxTimer HeartbeatTimer_g = FxTimer();
 
-/**
- * @brief Device state timer.
- * 
- */
+/** @brief Device state timer. */
 FxTimer DeviceStateTimer_g = FxTimer();
 
-/**
- * @brief MQTT Client.
- * 
- */
+/** @brief MQTT client */
 AsyncMqttClient MQTTClient_g;
 
 #ifdef ENABLE_IR_INTERFACE
@@ -343,10 +321,7 @@ decode_results IRResults_g;
 
 #endif // ENABLE_IR_INTERFACE
 
-/**
- * @brief Timestamp text buffer.
- * 
- */
+/** @brief Timestamp text buffer. */
 char TimestampBuff_g[18];
 
 /**
@@ -419,30 +394,6 @@ void configure_arduino_ota();
 #pragma endregion
 
 #pragma region Functions
-
-/**
- * @brief Printout in the debug console flash state.
- * 
- */
-void show_device_properties() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-#if ESP8266
-// ESP8266
-	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
-#endif
-	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-	DEBUGLOG("\r\n");
-}
 
 #pragma region SOFTWARE ON OFF
 
@@ -1140,10 +1091,6 @@ void read_device_serial()
 
 #pragma endregion
 
-/**
- * @brief Setup
- * 
- */
 void setup()
 {
 	// Setup debug port module.
@@ -1284,7 +1231,11 @@ void loop()
 			//DEBUGLOG("Time: %s\r\n", NTPClient_g.getFormattedTime().c_str());
 
 			DeviceStatus.Timestamp = NTPClient_g.getEpochTime(); // -DeviceConfiguration.NTPTimezone;
-			DeviceStatus.Voltage = (int)map(analogRead(A0), 0, 1023, 0, 3.3);
+#ifdef ESP32
+			DeviceStatus.Voltage = battery_voltage(PIN_BATT);
+#elif defined(ESP8266)
+			DeviceStatus.Voltage = 0.0F;
+#endif
 			DeviceStatus.RSSI = WiFi.RSSI();
 			DeviceStatus.SSID = NetworkConfiguration.SSID;
 			DeviceStatus.Flags = 0; // TODO: Flags

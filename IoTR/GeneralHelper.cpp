@@ -121,3 +121,47 @@ int to_hours(int minutes)
 {
 	return minutes / 60;
 }
+
+/** @brief Printout in the debug console flash state.
+ *  @return Void.
+ */
+void show_device_properties() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+#if defined(ESP8266)
+// ESP8266
+	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
+#endif
+
+	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
+	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
+	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
+	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
+	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
+	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
+	DEBUGLOG("\r\n");
+}
+
+#ifdef ESP32
+
+#ifdef BATT_MONITOR
+
+/** @brief Read battery voltage.
+ *  @return float voltage.
+ */
+float battery_voltage(int pin)
+{
+	static float batt_voltage = 0.0;
+
+	float batt_voltage = (float)(analogRead(pin)/4095)*2*3.3*1.1;
+
+	return batt_voltage;
+}
+
+#endif
+
+#endif
